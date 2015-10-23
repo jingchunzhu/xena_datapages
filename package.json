@@ -40,9 +40,10 @@
     "bootstrap": "^3.3.4",
     "react": "^0.13.1",
     "react-bootstrap": "^0.20.0",
-    "rx": "^3.0.0",
+    "rx": "^2.4.3",
     "rx-dom": "^4.0.4",
-    "rx-react": "^0.2.0",
-    "underscore": "^1.7.0"
+    "underscore": "^1.7.0",
+    "lunr": "0.5.7",
+    "ga4gh-rxjs": "^1.0.1"
   }
 }

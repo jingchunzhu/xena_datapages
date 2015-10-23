@@ -17,9 +17,13 @@ var path = document.location.pathname;
 
 if (path.match(/^\/$/)) {
 	require.ensure(['index'], function () {
-        // XXX see above
-		require(['index']).foo; // eslint-disable-line no-unused-expressions
+    // XXX see above
+    require(['index']); // eslint-disable-line no-unused-expressions
 	});
+} else if (path.match(/^\/datapages/)) {
+  require(['datapages']);
+} else if (path.match(/^\/hub$/)) {
+  require(['hub']);
 } else {
     document.write('Page not found');
 }
