@@ -20,10 +20,17 @@ if (path.match(/^\/$/)) {
     // XXX see above
     require(['index']); // eslint-disable-line no-unused-expressions
 	});
-} else if (path.match(/^\/datapages/)) {
-  require(['datapages']);
-} else if (path.match(/^\/hub$/)) {
-  require(['hub']);
-} else {
+}
+else if (path.match(/^\/datapages/)) {
+  var datapages = require('./datapages'),
+    baseNode = document.getElementById('main');
+  datapages.start(baseNode);
+}
+else if (path.match(/^\/hub$/)) {
+  var   baseNode = document.getElementById('main'),
+    hub = require('./hub');
+  hub.start(baseNode);
+}
+else {
     document.write('Page not found');
 }

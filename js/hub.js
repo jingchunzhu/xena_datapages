@@ -107,7 +107,8 @@ define(["dom_helper", "session", "xenaQuery", "../css/datapages.css"],
 		//baseNode.appendChild(node);
 	}
 
-	var baseNode = document.getElementById('main');
-	start(baseNode);
+	return {
+		start: start
+	};
 });
 

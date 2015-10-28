@@ -495,7 +495,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		sectionNode.appendChild(dom_helper.elt("resultsameLength",
 			dom_helper.hrefLink(link, link),
 			document.createTextNode("; "),
-			dom_helper.hrefLink("Metadata", metalink)));
+			dom_helper.hrefLink("Full metadata", metalink)));
 
 		sectionNode.appendChild(dom_helper.elt("br"));
 
@@ -552,8 +552,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 			}
 
 			sectionNode.appendChild(dom_helper.elt("resultsameLength",
-				dom_helper.hrefLink(probeMap, link),
-				document.createTextNode("; "),
+				dom_helper.hrefLink("probeMap", link),
+				document.createTextNode(";  "),
 				dom_helper.hrefLink("Metadata", metalink)));
 
 			sectionNode.appendChild(dom_helper.elt("br"));
@@ -647,14 +647,19 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 				}
 				sectionNode.replaceChild(spaceHolderNode, oldNode);
 
-				tmpNode =dom_helper.elt("a","Show More Data Snippets");
+				tmpNode =dom_helper.elt("a","Show More Data");
 				tmpNode.setAttribute("class","textLink");
 				addMoreDataLink(dataset,probes.length,tmpNode);
 				spaceHolderNode.appendChild(tmpNode);
 
-				tmpNode =dom_helper.elt("a","Show All Identifiers");
+				tmpNode =dom_helper.elt("a","All Identifiers");
 				tmpNode.setAttribute("class","textLink");
 				addAllIdLink(dataset, tmpNode);
+				spaceHolderNode.appendChild(tmpNode);
+
+				tmpNode =dom_helper.elt("a","All Samples");
+				tmpNode.setAttribute("class","textLink");
+				addAllSampleLink(dataset, tmpNode);
 				spaceHolderNode.appendChild(tmpNode);
 			});
 		});
@@ -668,11 +673,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		baseNode.appendChild(sectionNode);
 	}
 
-	function allIdentifiersPage (query_string){
-		var host = query_string.host,
-			datasetname = query_string.dataset,
-			label = query_string.label,
-			textNode, text,
+	function allIdentifiersPage (host, dataset, label){
+		var textNode, text,
 			rootNode = dom_helper.sectionNode("bigDataSnippet");
 
 		document.body.appendChild(rootNode);
@@ -681,9 +683,27 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		rootNode.appendChild(textNode);
 
 		text="Identifiers\n";
-		xenaQuery.dataset_field(host, datasetname).subscribe(function(probes){
+		xenaQuery.dataset_field(host, dataset).subscribe(function(probes){
 			probes.forEach(function(probe){
 				text = text +probe.name+"\n";
+			});
+			textNode.innerHTML=text;
+		});
+	}
+
+	function allSamplesPage (host, dataset, label){
+		var textNode, text,
+			rootNode = dom_helper.sectionNode("bigDataSnippet");
+
+		document.body.appendChild(rootNode);
+		rootNode.appendChild(dom_helper.elt("h3","dataset: "+label));
+		textNode = document.createElement("pre");
+		rootNode.appendChild(textNode);
+
+		text="Samples\n";
+		xenaQuery.dataset_samples(host, dataset).subscribe(function(samples){
+			samples.forEach(function(sample){
+				text = text + sample+"\n";
 			});
 			textNode.innerHTML=text;
 		});
@@ -694,12 +714,29 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 			host= JSON.parse(dataset.dsID).host,
 			label = dataset.label?dataset.label: name,
 			link, qString,
-			qStringObj ={};
+			qStringObj = {
+				"host": host,
+				"dataset": name,
+				"label": label,
+				"allIdentifiers": true
+			};
 
-		qStringObj.host = host;
-		qStringObj.dataset = name;
-		qStringObj.label = label;
-		qStringObj.allIds = true;
+		qString= dom_helper.JSONToqueryString(qStringObj);
+		link = "../datapages/?"+qString;
+		linkNode.setAttribute("href", link);
+	}
+
+	function addAllSampleLink (dataset, linkNode){
+		var name = JSON.parse(dataset.dsID).name,
+			host= JSON.parse(dataset.dsID).host,
+			label = dataset.label?dataset.label: name,
+			link, qString,
+			qStringObj = {
+				"host": host,
+				"dataset": name,
+				"label": label,
+				"allSamples": true
+			};
 
 		qString= dom_helper.JSONToqueryString(qStringObj);
 		link = "../datapages/?"+qString;
@@ -1023,12 +1060,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 	}
 
 
-	function bigDataSnippetPage (query_string){
-		var host = query_string.host,
-			dataset = query_string.dataset,
-			nSamples = parseFloat(query_string.nSamples),
-			nProbes = parseFloat(query_string.nProbes),
-			blockNode = dom_helper.elt("span", "If you are reading this, you need release browser SHIELD to see the data requested"),
+	function bigDataSnippetPage (host, dataset, nSamples, nProbes){
+		var blockNode = dom_helper.elt("span", "If you are reading this, you need release browser SHIELD to see the data requested"),
 			rootNode = dom_helper.sectionNode("bigDataSnippet"),
 			node = document.createElement("div");
 
@@ -1452,12 +1485,19 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 
 	function start(baseNode){
 		var container, sideNode, mainNode,
-			host, dataset, cohort;
+			keys = Object.keys(query_string),
+			host = query_string.host,
+			dataset =decodeURIComponent(query_string.dataset),
+			cohort = decodeURIComponent(query_string.cohort),
+			sample = decodeURIComponent(query_string.sample),
+			label = decodeURIComponent(query_string.label),
+			nSamples = query_string.nSamples,
+			nProbes = query_string.nProbes,
+			allIdentifiers = query_string.allIdentifiers,
+			allSamples = query_string.allSamples;
 
 		// ?host=id
-		if (Object.keys(query_string).length===1 && query_string.host) {
-			host = query_string.host;
-
+		if (keys.length===1 && host) {
 			if (allHosts.indexOf(host) === -1) {
 			    return;
 			}
@@ -1465,10 +1505,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		}
 
 		// ?dataset=id & host=id
-		else if (Object.keys(query_string).length===2 && query_string.host && query_string.dataset) {
-			dataset = query_string.dataset;
-			host = query_string.host;
-
+		else if (keys.length===2 && host && dataset) {
 			container = dom_helper.elt("div");
 			container.setAttribute("id", "content-container");
 
@@ -1495,18 +1532,14 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		}
 
 		// ?sample=id&cohort=id
-		else if ( Object.keys(query_string).length===2 && query_string.cohort && query_string.sample) {
-			var sample = query_string.sample;
-			cohort = decodeURIComponent(query_string.cohort);
+		else if ( keys.length===2 && cohort && sample) {
 			ifCohortExistDo(cohort, activeHosts, undefined, function() {
 				samplePage(baseNode, sample, cohort);
 			});
 		}
 
 		// ?cohort=id
-		else if (Object.keys(query_string).length ===1 && query_string.cohort) {
-			cohort = query_string.cohort;
-
+		else if (keys.length ===1 && cohort) {
 			container = dom_helper.elt("div");
 			container.setAttribute("id", "content-container");
 
@@ -1526,19 +1559,22 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		}
 
 		// large data snippet
-		else if (Object.keys(query_string).length ===4 && query_string.host && query_string.dataset &&
-				query_string.nSamples && query_string.nProbes) {
-			bigDataSnippetPage (query_string);
+		else if (keys.length ===4 && host && dataset && nSamples && nProbes) {
+			bigDataSnippetPage (host, dataset, nSamples, nProbes);
 		}
 
-		// all identifiers from a dataset
-		else if (Object.keys(query_string).length ===4 && query_string.host && query_string.dataset &&
-				query_string.label && query_string.allIds) {
-			allIdentifiersPage (query_string);
+		// all identifiers of a dataset
+		else if (keys.length ===4 && host && dataset && label && allIdentifiers) {
+			allIdentifiersPage (host, dataset, label);
 		}
 
-		else if (query_string.ga4gh){
-			dataPagesGPosition.start(query_string,baseNode);
+		// all samples of a dataset
+		else if (keys.length ===4 && host && dataset && label && allSamples) {
+			allSamplesPage (host, dataset, label);
+		}
+
+		else if (keys.ga4gh){
+			dataPagesGPosition.start(query_string, baseNode);
 		}
 
 		// front page: cohort list
@@ -1546,8 +1582,6 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 			frontPage(baseNode);
 		}
 	}
-
-	var	baseNode = document.getElementById('main');
 
 	session.sessionStorageInitialize();
 	var state = JSON.parse(sessionStorage.state),
@@ -1557,5 +1591,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		localHost = state.localHost, //localhost
 		metadataFilterHosts = state.metadataFilterHosts; // metadataFilter
 
-	start(baseNode);
+	return {
+		start:start
+	};
 });
