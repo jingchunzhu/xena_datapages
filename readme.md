@@ -1,8 +1,6 @@
-# Client template
+# Data pages
 
-An evolving build for client-side development.
-
-webpack, react, rx, babel, mocha, jsverify.
+Data overview pages for UCSC xena servers.
 
 ## Build
 The build is based on npm and webpack.
@@ -10,8 +8,8 @@ The build is based on npm and webpack.
    * On OSX, install brew http://brew.sh/
    * `brew install git`
    * `brew install node`
- * `git clone https://github.com/acthp/client-template.git`
- * `cd client-template`
+ * `git clone https://github.com/acthp/data_pages.git`
+ * `cd data_pages`
  * `npm install`
  * `npm start`
  * browse to [http://localhost:8080/webpack-dev-server/](http://localhost:8080/webpack-dev-server/)
