@@ -37,7 +37,7 @@ publishing with npm. The workflow is as follows.
 
 ## After publishing
 
-Update dependents (e.g. ucsc-xena-client) by running ```npm update --save xena_datapages``` in those projects. If the major version has changed, edit their ```package.json``` to reflect the new version requirements.
+Update dependents (e.g. ucsc-xena-client) by running ```npm update --save ucsc-xena-datapages``` in those projects. If the major version has changed, edit their ```package.json``` to reflect the new version requirements.
 
 ## Caveats
 
