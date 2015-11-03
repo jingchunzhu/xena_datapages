@@ -10,12 +10,13 @@
     "start": "webpack-dev-server --devtool eval --progress --colors --history-api-fallback",
     "build": "webpack",
     "build:prod": "npm run build -- --config webpack.prod.js --devtool source-map",
-    "prebuild": "npm run clean",
-    "prepublish": "babel js -d dist"
+    "prebuild": "npm run clean"
   },
   "files": [
     "NOTICE",
-    "dist"
+    "js",
+    "css",
+    "images"
   ],
   "author": "Brian Craft",
   "devDependencies": {
