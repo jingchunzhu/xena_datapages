@@ -51,5 +51,22 @@
     "underscore": "^1.7.0",
     "lunr": "0.5.7",
     "ga4gh-rxjs": "^1.0.1"
-  }
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jingchunzhu/xena_datapages.git"
+  },
+  "keywords": [
+    "xena",
+    "datapages"
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/jingchunzhu/xena_datapages/issues"
+  },
+  "homepage": "https://github.com/jingchunzhu/xena_datapages"
 }

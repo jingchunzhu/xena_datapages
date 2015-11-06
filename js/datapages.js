@@ -8,13 +8,12 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 
 	var query_string = dom_helper.queryStringToJSON(),  	//parse current url to see if there is a query string
 		COHORT_NULL = '(unassigned)',
-		TYPE_NULL = 'unknown',
+		TYPE_NULL = 'genomicMatrix',
 		NOT_GENOMICS = ["sampleMap", "probeMap", "genePred", "genePredExt","genomicSegment"],
 		FORMAT_MAPPING = {
 			'clinicalMatrix': "ROWs (samples)  x  COLUMNs (identifiers)",
 			'genomicMatrix': "ROWs (identifiers)  x  COLUMNs (samples)",
 			'mutationVector': "Mutation by Position",
-			TYPE_NULL: "unknown",
 			'unknown': "unknown"
 		};
 
