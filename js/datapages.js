@@ -1,21 +1,11 @@
 /*jslint browser:true, nomen: true */
 /*global define: false, confirm: true */
+/*global require: false, module: false */
 
 define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "dataPagesGPosition",
-	'../images/Treehouse.jpg', 'lunr', "rx-dom", "../css/datapages.css"],
-	function (dom_helper, xenaQuery, session, _, Rx, xenaAdmin, dataPagesGPosition, treehouseImg, lunr) {
+	'lunr',  "rx-dom", "../css/datapages.css"],
+	function (dom_helper, xenaQuery, session, _, Rx, xenaAdmin, dataPagesGPosition, lunr) {
 	'use strict';
-
-	var query_string = dom_helper.queryStringToJSON(),  	//parse current url to see if there is a query string
-		COHORT_NULL = '(unassigned)',
-		TYPE_NULL = 'genomicMatrix',
-		NOT_GENOMICS = ["sampleMap", "probeMap", "genePred", "genePredExt","genomicSegment"],
-		FORMAT_MAPPING = {
-			'clinicalMatrix': "ROWs (samples)  x  COLUMNs (identifiers)",
-			'genomicMatrix': "ROWs (identifiers)  x  COLUMNs (samples)",
-			'mutationVector': "Mutation by Position",
-			'unknown': "unknown"
-		};
 
 	// check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
 	function checkGenomicDataset(hosts, cohort, goodStatus) {
@@ -105,7 +95,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 
 	function warningPopUp (node, loaderWarning){
 		node.onclick = function(){
-			var root = $('<div>')[0];
+			alert("Load Waring:\n"+JSON.stringify(loaderWarning));
+			/*var root = $('<div>')[0];
 			$(root).dialog({
 				modal: true,
 				title: 'Loader Warning',
@@ -114,44 +105,28 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 			});
 			root.appendChild(document.createTextNode(JSON.stringify(loaderWarning)));
 			return false;
+			*/
 		};
-	}
-
-	// short COHORT section detail
-	function eachCohortDetail(cohortName, hosts, node) {
-		var hostNode, tmpNode;
-
-		// samples: N
-		node.appendChild(dom_helper.labelValueNode("samples:", cohortName + "sampleN"));
-		updateDOM_xenaCohort_sampleN(cohortName + "sampleN", hosts, cohortName);
-
-
-		// host: xxx
-		hostNode = dom_helper.valueNode(cohortName + "Hosts");
-		hosts.forEach(function (host) {
-			xenaQuery.all_cohorts(host).subscribe(function (s) {
-				if (s.indexOf(cohortName) !== -1) {
-					tmpNode= dom_helper.hrefLink(host, "?host=" + host);
-					tmpNode.setAttribute("id","status"+host);
-					session.updateHostStatus(host);
-					if (hostNode.children.length === 0) {
-						hostNode.appendChild(dom_helper.elt("label", "hosts:"));
-					} else {
-						hostNode.appendChild(document.createTextNode("; "));
-					}
-					hostNode.appendChild(tmpNode);
-				}
-			});
-		});
-		node.appendChild(hostNode);
 	}
 
 	// the short COHORT section with no detail, just name, vizbutton (if valid), img (optional)
 	function eachCohortMultiple(cohortName, hosts, node) {
-		var liNode = document.createElement("li"), img,
-			nodeTitle = dom_helper.hrefLink(cohortName, "?cohort=" + encodeURIComponent(cohortName));
+		var liNode = document.createElement("li"),
+			img,
+			link = "?cohort=" + encodeURIComponent(cohortName),
+			nodeTitle = dom_helper.hrefLink(cohortName, link),
+			tmpNode,
+			hostsCopy,
+			d1,d2, dGap;
 
-		img = getImage(cohortName);
+		//info image
+		tmpNode = document.createElement("a");
+		tmpNode.setAttribute("href", link);
+		tmpNode.appendChild(buildInfoImage("click for cohort detail ..."));
+		liNode.appendChild(tmpNode);
+
+		//treehouse img
+		img = buildTreeHouseImage(cohortName);
 		if (img){
 			liNode.appendChild(img);
 		}
@@ -161,10 +136,46 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 			nodeTitle.style.color="gray";
 		}
 
+		//title
 		liNode.appendChild(nodeTitle);
-		node.appendChild(liNode);
-		cohortHeatmapButton(cohortName, _.intersection(activeHosts, userHosts), liNode);
 
+		//viz button
+		tmpNode = document.createElement("span");
+		liNode.appendChild(tmpNode);
+		cohortHeatmapButton(cohortName, _.intersection(activeHosts, userHosts), tmpNode);
+
+		// new status
+		tmpNode = document.createElement("a");
+		tmpNode.setAttribute("href", link);
+
+  	hostsCopy = hosts.slice(0);
+  	if (hostsCopy.indexOf(localHost)!==-1){
+  		hostsCopy.splice(hostsCopy.indexOf(localHost),1);
+  	}
+		xenaQuery.dataset_list(hostsCopy, cohortName).subscribe( function (s) {
+			s.some(function (obj){
+				obj.datasets.some(function (ds){
+					if (ds.version){
+						d1 = new Date();
+						d2 =  new Date(ds.version);
+						dGap = (d1.getTime()-d2.getTime())/(1000 *60*60*24); //days
+						if (dGap <60){
+							tmpNode.appendChild(buildNewImage());
+							liNode.appendChild(tmpNode);
+							return true;
+						} else {
+							return false;
+						}
+					} else {
+						return false;
+					}
+				});
+			});
+		});
+
+		node.appendChild(liNode);
+
+		//remove extra
 		if (cohortName===COHORT_NULL){
 			ifCohortDoesNotExistDo(cohortName, hosts, session.GOODSTATUS, function (){
 				node.removeChild(liNode);
@@ -172,15 +183,76 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		}
 	}
 
-	function getImage (cohortName){
+	function buildTreeHouseImage (cohortName){
 		var img;
 		if (cohortName.search(/^Treehouse/gi) !== -1){
 			img = new Image();
   	  img.src = treehouseImg;
-  	  img.height = "50";
+  	  img.height = "40";
     }
     return img;
 	}
+
+	function buildNewImage () {
+		var node = document.createElement("span"),
+			img = new Image();
+
+  	img.src = newImgSource;
+  	img.height = "12";
+  	node.appendChild(img);
+		adhocTooltip (node, img, "new data ..." );
+    return node;
+	}
+
+	function buildInfoImage (tipMessage) {
+		var node = document.createElement("span"),
+			img = new Image();
+
+  	img.src = infoImgSource;
+  	img.height = "20";
+  	node.appendChild(img);
+
+		adhocTooltip (node, img, tipMessage);
+
+    return node;
+	}
+
+	function adhocTooltip (outsideDiv, tooltipDOM, tipMessage ){
+		var fadeSpeed = 25; // a value between 1 and 1000 where 1000 will take 10
+		                    // seconds to fade in and out and 1 will take 0.01 sec.
+
+		var showTip = function(){
+			var tip = document.createElement("span");
+	    tip.className = "tooltip";
+	    tip.id = "tip";
+	    tip.innerHTML = tipMessage;
+		  outsideDiv.appendChild(tip);
+	    tip.style.opacity="0"; // to start with...
+	    var intId = setInterval(function(){
+	        var newOpacity = parseFloat(tip.style.opacity)+0.1;
+	        tip.style.opacity = newOpacity.toString();
+	        if(tip.style.opacity === "1"){
+	            clearInterval(intId);
+	        }
+	    }, fadeSpeed);
+		};
+		var hideTip = function(){
+		    var tip = document.getElementById("tip");
+		    var intId = setInterval(function(){
+		        var newOpacity = parseFloat(tip.style.opacity)-0.1;
+		        tip.style.opacity = newOpacity.toString();
+		        if(tip.style.opacity === "0"){
+		            clearInterval(intId);
+		            tip.remove();
+		        }
+		    }, fadeSpeed);
+		    tip.remove();
+		};
+
+		tooltipDOM.addEventListener("mouseover", showTip, false);
+		tooltipDOM.addEventListener("mouseout", hideTip, false);
+	}
+
 
 	function cohortListPage(hosts, rootNode) {
 		if (!hosts || hosts.length <= 0) {
@@ -239,7 +311,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		vizbuttonParent = dom_helper.elt("h2", "cohort: ");
 		node.appendChild(vizbuttonParent);
 
-		img = getImage(cohortName);
+		img = buildTreeHouseImage(cohortName);
 			if (img){
 				vizbuttonParent.appendChild(img);
 		}
@@ -248,7 +320,11 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		node.appendChild(document.createElement("br"));
 
 		ifCohortExistDo (cohortName, hosts, undefined, function() {
-			eachCohortDetail(cohortName, hosts, node);
+			// samples: N
+			node.appendChild(dom_helper.labelValueNode("samples:", cohortName + "sampleN"));
+			updateDOM_xenaCohort_sampleN(cohortName + "sampleN", hosts, cohortName);
+
+			//dataset list
 			xenaQuery.dataset_list(hosts, cohortName).subscribe(
 				function (s) {
 					//collection information
@@ -258,6 +334,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 						dataHost = {},
 						dataName = {},
 						dataStatus ={},
+						dataVersion ={},
 						dataWarning={},
 						dataCollection={};
 
@@ -272,7 +349,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 								name = dataset.name,
 								status = dataset.status,
 								loaderWarning = dataset.loader,
-								fullname = host + name;
+								fullname = host + name,
+								version = dataset.version;
 
 							if (NOT_GENOMICS.indexOf(format) === -1) {
 								if (!label) {
@@ -287,6 +365,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 								dataHost[fullname] = host;
 								dataName[fullname] = name;
 								dataStatus[fullname] = status;
+								dataVersion[fullname] = version;
 								dataWarning[fullname] = loaderWarning;
 								dataCollection[fullname]= dataset;
 							}
@@ -312,8 +391,19 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 						}).sort().forEach(function (item){
 							// name
 							var fullname = item[1],
-								datasetNode = dom_helper.elt("li", dom_helper.hrefLink(dataLabel[fullname], "?dataset=" + dataName[fullname] + "&host=" + dataHost[fullname]));
+								link = "?dataset=" + dataName[fullname] + "&host=" + dataHost[fullname],
+								datasetNode = document.createElement("ul");
 
+							//info image
+							tmpNode = document.createElement("a");
+							tmpNode.setAttribute("href", link);
+							tmpNode.appendChild(buildInfoImage("click for dateset detail ..."));
+							datasetNode.appendChild(tmpNode);
+
+							//dataset name and link
+							datasetNode.appendChild(dom_helper.hrefLink(dataLabel[fullname], link));
+
+							//status
 							if (dataStatus[fullname] === session.GOODSTATUS && !dataWarning[fullname]) { // perfect data show sampleN
 								datasetNode.appendChild(dom_helper.valueNode(fullname + "sampleN"));
 								xenaQuery.dataset_samples(dataHost[fullname], dataName[fullname]).subscribe(function (s) {
@@ -324,12 +414,32 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 								tmpNode = dom_helper.hrefLink(" ["+ dataStatus[fullname]+" with warning] ","#");
 								warningPopUp (tmpNode, dataWarning[fullname]);
 								datasetNode.appendChild(tmpNode);
+
+								datasetNode.appendChild(dom_helper.valueNode(fullname + "sampleN"));
+								xenaQuery.dataset_samples(dataHost[fullname], dataName[fullname]).subscribe(function (s) {
+									document.getElementById(fullname + "sampleN").
+									appendChild(dom_helper.elt("label", document.createTextNode(" (n=" + s.length.toLocaleString() + ")")));
+								});
 							} else if (dataStatus[fullname] === "error") {  // show error status
 								tmpNode = dom_helper.elt("span"," ["+dataStatus[fullname]+"] ");
 								tmpNode.style.color="red";
 								datasetNode.appendChild(tmpNode);
 							} else {
 								datasetNode.appendChild(document.createTextNode(" ["+dataStatus[fullname]+"] "));
+							}
+
+							// new
+							tmpNode = document.createElement("a");
+							tmpNode.setAttribute("href", link);
+							datasetNode.appendChild(tmpNode);
+							if (dataHost[fullname]!==localHost && dataVersion[fullname]){
+								var d1 = new Date(),
+									d2 =  new Date(dataVersion[fullname]),
+									dGap = (d1.getTime()-d2.getTime())/(1000 *60*60*24); //days
+								if (dGap <60){
+									tmpNode.appendChild(buildNewImage());
+									tmpNode.appendChild(document.createTextNode(" "));
+								}
 							}
 
 							// host
@@ -360,21 +470,29 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 					rootNode.appendChild(nodeDataType);
 
 					// samples section
-					var sampleNode = dom_helper.sectionNode("dataType");
+					/*var sampleNode = dom_helper.sectionNode("dataType");
 					rootNode.appendChild(sampleNode);
 
-					xenaQuery.all_samples(_.uniq(_.values(dataHost))[0], cohortName).subscribe(
-						function (s) {
-							sampleNode.appendChild(dom_helper.elt("header", s.length.toLocaleString() + " samples"));
-							listNode = dom_helper.elt("ul");
+					var source = Rx.Observable.zipArray(
+						hosts.map(function (host) {
+							return xenaQuery.all_samples(host,cohortName);
+						})
+					);
+
+					source.subscribe(function(x){
+						var samples = _.uniq(_.flatten(x));
+
+						sampleNode.appendChild(dom_helper.elt("header", samples.length.toLocaleString() + " samples"));
+						listNode = dom_helper.elt("ul");
 							sampleNode.appendChild(listNode);
 							sampleNode.appendChild(dom_helper.elt("br"));
 
-							s.forEach(function (sample) {
+							samples.forEach(function (sample) {
 								listNode.appendChild(dom_helper.elt(
 									"li", dom_helper.hrefLink(sample, "?sample=" + sample + "&cohort=" + cohortName)));
 							});
-						});
+					});
+					*/
 			});
 		});
 	}
@@ -1018,32 +1136,16 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 
 	function downloadLink(dataset){
 		var name = JSON.parse(dataset.dsID).name,
-			host= JSON.parse(dataset.dsID).host,
-			link;
+			host= JSON.parse(dataset.dsID).host;
 
-		if (host === "https://genome-cancer.ucsc.edu:443/proj/public/xena"){
-			var array = name.split("/");
-			link = "https://genome-cancer.ucsc.edu/download/public/xena/" + array.slice(1, array.length).join("/");
-		}
-		else {
-			link = host+"/download/"+name;
-		}
-		return link;
+		return host+"/download/"+name;
 	}
 
 	function metaDataLink(dataset){
 		var name = JSON.parse(dataset.dsID).name,
-			host= JSON.parse(dataset.dsID).host,
-			link;
+			host= JSON.parse(dataset.dsID).host;
 
-		if (host === "https://genome-cancer.ucsc.edu:443/proj/public/xena"){
-			var array = name.split("/");
-			link = "https://genome-cancer.ucsc.edu/download/public/xena/" + array.slice(1, array.length).join("/")+".json";
-		}
-		else {
-			link = host+"/download/"+name+".json";
-		}
-		return link;
+		return host+"/download/"+name+".json";
 	}
 
 	function downloadDataButton (dataset){
@@ -1414,17 +1516,11 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		var sideNode = hubSideBar(activeHosts);
 		container.appendChild(sideNode);
 
-		/*
-		var searchNode = document.createElement("div");
-		searchUI(searchNode);
-		sideNode.appendChild(searchNode);
-		*/
-
 		//main section cohort list page
 		var mainNode = dom_helper.elt("div");
 		mainNode.setAttribute("id", "dataPagesMain");
 
-
+		//search node
 		var searchNode = dom_helper.sectionNode("cohort");
 		searchUI(searchNode);
 		mainNode.appendChild(searchNode);
@@ -1466,19 +1562,16 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 
 
 	function updateDOM_xenaCohort_sampleN(DOM_id, hosts, cohort) {
-		hosts.forEach(function (host) {
-			xenaQuery.all_samples(host, cohort).subscribe(function (s) {
-				if (s.length !== 0) {
-					var node = document.getElementById(DOM_id),
-						text;
-					if (node.children.length > 0) {
-						text = node.lastChild.textContent;
-						node.lastChild.textContent = text + "; " + s.length.toLocaleString();
-					} else {
-						node.appendChild(dom_helper.elt("result", " " + s.length.toLocaleString()));
-					}
-				}
-			});
+		var source = Rx.Observable.zipArray(
+			hosts.map(function (host) {
+				return xenaQuery.all_samples(host,cohort);
+			})
+		);
+
+		source.subscribe(function(x){
+			var node = document.getElementById(DOM_id),
+				sampleN= _.uniq(_.flatten(x)).length;
+			node.appendChild(dom_helper.elt("result", " " + sampleN.toLocaleString()));
 		});
 	}
 
@@ -1581,6 +1674,21 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 			frontPage(baseNode);
 		}
 	}
+
+	var query_string = dom_helper.queryStringToJSON(),  	//parse current url to see if there is a query string
+		COHORT_NULL = '(unassigned)',
+		TYPE_NULL = 'genomicMatrix',
+		NOT_GENOMICS = ["sampleMap", "probeMap", "genePred", "genePredExt","genomicSegment"],
+		FORMAT_MAPPING = {
+			'clinicalMatrix': "ROWs (samples)  x  COLUMNs (identifiers)",
+			'genomicMatrix': "ROWs (identifiers)  x  COLUMNs (samples)",
+			'mutationVector': "Mutation by Position",
+			'unknown': "unknown"
+		},
+		treehouseImg = require('../images/Treehouse.jpg'),
+		newImgSource = require('../images/new.jpg'),
+		infoImgSource = require('../images/Info.png');
+
 
 	session.sessionStorageInitialize();
 	var state = JSON.parse(sessionStorage.state),
