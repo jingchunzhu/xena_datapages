@@ -69,9 +69,9 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 		} else {
 			defport = '7222';
 		}
+
 		port = tokens[4] || defport;
 		path = tokens[5] || '';
-
 		url = proto + host + ':' + port + path;
 
 		return {

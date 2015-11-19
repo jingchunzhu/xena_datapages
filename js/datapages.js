@@ -153,23 +153,25 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
   		hostsCopy.splice(hostsCopy.indexOf(localHost),1);
   	}
 		xenaQuery.dataset_list(hostsCopy, cohortName).subscribe( function (s) {
-			s.some(function (obj){
-				obj.datasets.some(function (ds){
-					if (ds.version){
-						d1 = new Date();
-						d2 =  new Date(ds.version);
-						dGap = (d1.getTime()-d2.getTime())/(1000 *60*60*24); //days
-						if (dGap <60){
-							tmpNode.appendChild(buildNewImage());
-							liNode.appendChild(tmpNode);
-							return true;
-						} else {
-							return false;
-						}
+			var datasetsList= _.flatten(s.map(function(obj){
+				return _.values(_.pick(obj,'datasets'));
+			}));
+
+			datasetsList.some(function (ds){
+				if (ds.version){
+					d1 = new Date();
+					d2 =  new Date(ds.version);
+					dGap = (d1.getTime()-d2.getTime())/(1000 *60*60*24); //days
+					if (dGap <60){
+						tmpNode.appendChild(buildNewImage());
+						liNode.appendChild(tmpNode);
+						return true;
 					} else {
 						return false;
 					}
-				});
+				} else {
+					return false;
+				}
 			});
 		});
 
