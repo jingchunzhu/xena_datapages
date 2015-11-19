@@ -1079,7 +1079,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 
 		var checkNode = dom_helper.sectionNode("sidehub");
 
-		checkNode.appendChild(dom_helper.elt("h3", dom_helper.hrefLink("Active Data Hubs", "../hub")));
+		checkNode.appendChild(dom_helper.elt("h3", dom_helper.hrefLink("Active Data Hubs", "../hub/")));
 		checkNode.appendChild(dom_helper.elt("br"));
 
 		hosts.forEach(function (host) {
