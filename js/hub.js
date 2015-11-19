@@ -8,9 +8,9 @@ define(["dom_helper", "session", "xenaQuery", "../css/hub.css"], function (dom_h
 		//build checkbox
 		var checkbox = session.hostCheckBox(host),
 		 	tmpNode = document.createElement("result2"),
-			label = hubNames[host]? hubNames[host]:host;
+			label = session.getHubName(host);
 
-		tmpNode.appendChild(dom_helper.hrefLink(label + " (connecting)", "../datapages/?host=" + host));
+		tmpNode.appendChild(dom_helper.hrefLink(label +" -- "+ host+" (connecting)", "../datapages/?host=" + host));
 		tmpNode.setAttribute("id", "statusHub" + host);
 		checkbox.appendChild(tmpNode);
 		return dom_helper.elt("h4", checkbox);
@@ -53,7 +53,6 @@ define(["dom_helper", "session", "xenaQuery", "../css/hub.css"], function (dom_h
 	session.sessionStorageInitialize();
 	var state = JSON.parse(sessionStorage.state),
 		hosts = state.allHosts,
-		hubNames = state.hubNames,
 		node = dom_helper.sectionNode("hub"),
 		newText, addbutton;
 

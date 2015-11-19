@@ -360,7 +360,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 								dataLabel[fullname] = label;
 								dataDescription[fullname] = description;
 								dataHost[fullname] = host;
-								dataHostShortLabel[fullname]= hubNames[host]? hubNames[host]:host;
+								dataHostShortLabel[fullname]= session.getHubName(host);
 								dataName[fullname] = name;
 								dataStatus[fullname] = status;
 								dataVersion[fullname] = version;
@@ -630,7 +630,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		// host: host
 		sectionNode.appendChild(dom_helper.elt("labelsameLength","host"));
 		hostNode = dom_helper.elt("resultsameLength",
-			dom_helper.hrefLink(hubNames[host]? hubNames[host]:host, "?host=" + host));
+			dom_helper.hrefLink(session.getHubName(host), "?host=" + host));
 		hostNode.setAttribute("id", "status" + host);
 		sectionNode.appendChild(hostNode);
 		session.updateHostStatus(host);
@@ -1086,7 +1086,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 			session.updateHostStatus(host);
 			var checkbox = session.metaDataFilterCheckBox(host),
 				tmpNode = dom_helper.elt("result2",
-					dom_helper.hrefLink(hubNames[host]?hubNames[host]:host + " (connecting)", "../datapages/?host=" + host));
+					dom_helper.hrefLink(session.getHubName(host) + " (connecting)", "../datapages/?host=" + host));
 
 			tmpNode.setAttribute("id", "sidebar" + host);
 			checkbox.setAttribute("id", "sidebarCheck" + host);
@@ -1539,7 +1539,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 	function hostPage (baseNode,host){
 		// host title
 		var node=dom_helper.sectionNode("cohort"),
-			hostLabel = hubNames[host]? hubNames[host]:host,
+			hostLabel = session.getHubName(host),
 			tmpNode = dom_helper.hrefLink(hostLabel + " (connecting)", "../datapages/?host=" + host);
 
 		tmpNode.setAttribute("id", "status" + host);
@@ -1697,8 +1697,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		activeHosts = state.activeHosts, // activetHosts
 		userHosts = state.userHosts, // selectedtHosts
 		localHost = state.localHost, //localhost
-		metadataFilterHosts = state.metadataFilterHosts, // metadataFilter
-		hubNames = state.hubNames;
+		metadataFilterHosts = state.metadataFilterHosts; // metadataFilter
 
 	return {
 		start:start

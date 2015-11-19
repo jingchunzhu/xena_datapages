@@ -91,8 +91,7 @@ define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 				allHosts: defaultAll,
 				userHosts: defaultHosts,
 				localHost: defaultLocal,
-				metadataFilterHosts: defaultHosts,
-				hubNames: defaultNames
+				metadataFilterHosts: defaultHosts
 			},
 			state = getSessionStorageState();
 
@@ -104,6 +103,15 @@ define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 		});
 
 		setXenaUserServer();
+	}
+
+	function getHubName(host){
+		if (defaultNames[host]){
+			return defaultNames[host];
+		}
+		else {
+			return host;
+		}
 	}
 
 	function getSessionStorageState () {
@@ -298,7 +306,7 @@ define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 		hostCheckBox: hostCheckBox,
 		metaDataFilterCheckBox: metaDataFilterCheckBox,
 		xenaHeatmapSetCohort: xenaHeatmapSetCohort,
-
+		getHubName: getHubName,
 		datasetHasFloats:datasetHasFloats,
 
 		GOODSTATUS: GOODSTATUS
