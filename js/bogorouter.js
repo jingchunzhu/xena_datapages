@@ -27,9 +27,7 @@ else if (path.match(/^\/datapages/)) {
   datapages.start(baseNode);
 }
 else if (path.match(/^\/hub$/)) {
-  var   baseNode = document.getElementById('main'),
-    hub = require('./hub');
-  hub.start(baseNode);
+  require('./hub');
 }
 else {
     document.write('Page not found');

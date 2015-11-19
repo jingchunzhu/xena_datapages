@@ -23,7 +23,6 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		});
 	}
 
-
 	// check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
 	function checkGenomicDatasetAllBad(hosts, cohort, goodStatus) {
 		return xenaQuery.dataset_list(hosts, cohort).map(function (s) {
@@ -116,8 +115,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 			link = "?cohort=" + encodeURIComponent(cohortName),
 			nodeTitle = dom_helper.hrefLink(cohortName, link),
 			tmpNode,
-			hostsCopy,
-			d1,d2, dGap;
+			d1,d2,dGap;
 
 		//info image
 		tmpNode = document.createElement("a");
@@ -148,11 +146,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		tmpNode = document.createElement("a");
 		tmpNode.setAttribute("href", link);
 
-  	hostsCopy = hosts.slice(0);
-  	if (hostsCopy.indexOf(localHost)!==-1){
-  		hostsCopy.splice(hostsCopy.indexOf(localHost),1);
-  	}
-		xenaQuery.dataset_list(hostsCopy, cohortName).subscribe( function (s) {
+		xenaQuery.dataset_list(hosts, cohortName).subscribe( function (s) {
 			var datasetsList= _.flatten(s.map(function(obj){
 				return _.values(_.pick(obj,'datasets'));
 			}));
@@ -162,7 +156,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 					d1 = new Date();
 					d2 =  new Date(ds.version);
 					dGap = (d1.getTime()-d2.getTime())/(1000 *60*60*24); //days
-					if (dGap <60){
+					if (dGap <newVersionThresholdDays){
 						tmpNode.appendChild(buildNewImage());
 						liNode.appendChild(tmpNode);
 						return true;
@@ -304,8 +298,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 	function cohortPage(cohortName, hosts, rootNode) {
 		//cohort section
 		var tmpNode,img,
-		    node = dom_helper.sectionNode("cohort"),
-		    vizbuttonParent;
+	    node = dom_helper.sectionNode("cohort"),
+	    vizbuttonParent;
 
 		rootNode.appendChild(node);
 
@@ -334,6 +328,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 						dataLabel = {},
 						dataDescription = {},
 						dataHost = {},
+						dataHostShortLabel ={},
 						dataName = {},
 						dataStatus ={},
 						dataVersion ={},
@@ -365,6 +360,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 								dataLabel[fullname] = label;
 								dataDescription[fullname] = description;
 								dataHost[fullname] = host;
+								dataHostShortLabel[fullname]= hubNames[host]? hubNames[host]:host;
 								dataName[fullname] = name;
 								dataStatus[fullname] = status;
 								dataVersion[fullname] = version;
@@ -434,18 +430,18 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 							tmpNode = document.createElement("a");
 							tmpNode.setAttribute("href", link);
 							datasetNode.appendChild(tmpNode);
-							if (dataHost[fullname]!==localHost && dataVersion[fullname]){
+							if (dataVersion[fullname]){
 								var d1 = new Date(),
 									d2 =  new Date(dataVersion[fullname]),
 									dGap = (d1.getTime()-d2.getTime())/(1000 *60*60*24); //days
-								if (dGap <60){
+								if (dGap <newVersionThresholdDays){
 									tmpNode.appendChild(buildNewImage());
 									tmpNode.appendChild(document.createTextNode(" "));
 								}
 							}
 
 							// host
-							tmpNode = dom_helper.hrefLink(dataHost[fullname], "?host=" + dataHost[fullname]);
+							tmpNode = dom_helper.hrefLink(dataHostShortLabel[fullname], "?host=" + dataHost[fullname]);
 							tmpNode.setAttribute("id", "status" + dataHost[fullname]);
 							datasetNode.appendChild(tmpNode);
 							session.updateHostStatus(dataHost[fullname]);
@@ -631,9 +627,10 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 			sectionNode.appendChild(dom_helper.elt("br"));
 		}
 
-		//  host: host
+		// host: host
 		sectionNode.appendChild(dom_helper.elt("labelsameLength","host"));
-		hostNode = dom_helper.elt("resultsameLength", dom_helper.hrefLink(host, "?host=" + host));
+		hostNode = dom_helper.elt("resultsameLength",
+			dom_helper.hrefLink(hubNames[host]? hubNames[host]:host, "?host=" + host));
 		hostNode.setAttribute("id", "status" + host);
 		sectionNode.appendChild(hostNode);
 		session.updateHostStatus(host);
@@ -1082,14 +1079,14 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 
 		var checkNode = dom_helper.sectionNode("sidehub");
 
-		checkNode.appendChild(dom_helper.elt("h3", dom_helper.hrefLink("Active Data Hubs", "../hub/")));
+		checkNode.appendChild(dom_helper.elt("h3", dom_helper.hrefLink("Active Data Hubs", "../hub")));
 		checkNode.appendChild(dom_helper.elt("br"));
 
 		hosts.forEach(function (host) {
 			session.updateHostStatus(host);
 			var checkbox = session.metaDataFilterCheckBox(host),
 				tmpNode = dom_helper.elt("result2",
-					dom_helper.hrefLink(host + " (connecting)", "../datapages/?host=" + host));
+					dom_helper.hrefLink(hubNames[host]?hubNames[host]:host + " (connecting)", "../datapages/?host=" + host));
 
 			tmpNode.setAttribute("id", "sidebar" + host);
 			checkbox.setAttribute("id", "sidebarCheck" + host);
@@ -1542,7 +1539,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 	function hostPage (baseNode,host){
 		// host title
 		var node=dom_helper.sectionNode("cohort"),
-			tmpNode = dom_helper.hrefLink(host + " (connecting)", "../datapages/?host=" + host);
+			hostLabel = hubNames[host]? hubNames[host]:host,
+			tmpNode = dom_helper.hrefLink(hostLabel + " (connecting)", "../datapages/?host=" + host);
 
 		tmpNode.setAttribute("id", "status" + host);
 		node.appendChild(dom_helper.elt("h2", tmpNode));
@@ -1689,7 +1687,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		},
 		treehouseImg = require('../images/Treehouse.jpg'),
 		newImgSource = require('../images/new.jpg'),
-		infoImgSource = require('../images/Info.png');
+		infoImgSource = require('../images/Info.png'),
+		newVersionThresholdDays = 30;
 
 
 	session.sessionStorageInitialize();
@@ -1698,7 +1697,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		activeHosts = state.activeHosts, // activetHosts
 		userHosts = state.userHosts, // selectedtHosts
 		localHost = state.localHost, //localhost
-		metadataFilterHosts = state.metadataFilterHosts; // metadataFilter
+		metadataFilterHosts = state.metadataFilterHosts, // metadataFilter
+		hubNames = state.hubNames;
 
 	return {
 		start:start

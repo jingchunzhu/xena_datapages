@@ -1,10 +1,20 @@
 /*jslint browser:true */
 /*global define: false */
+/*global require: false, module: false */
+
 define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 	'use strict';
 
 	var GOODSTATUS = "loaded";
 	var dom_helper = require('./dom_helper');
+	var defaultLocal = "https://local.xena.ucsc.edu:7223",
+		defaultUCSC ="https://genome-cancer.ucsc.edu:443/proj/public/xena",
+		defaultTCGA ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7222",
+		defaultNames ={};
+
+	defaultNames[defaultLocal]="Local Hub";
+	defaultNames[defaultUCSC]="UCSC Public Main Hub";
+	defaultNames[defaultTCGA]="TCGA Hub";
 
 	function xenaHeatmapStateReset() {
 		var xenaStateResets = {
@@ -67,18 +77,22 @@ define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 	}
 
 	function sessionStorageInitialize() {
-		var defaultLocal = "https://local.xena.ucsc.edu:7223",
-			defaultUCSC ="https://genome-cancer.ucsc.edu:443/proj/public/xena",
-			defaultHosts = [
+		var defaultHosts = [
 				defaultUCSC,
+				defaultLocal
+			],
+			defaultAll =[
+				defaultUCSC,
+				defaultTCGA,
 				defaultLocal
 			],
 			defaultState = {
 				activeHosts: defaultHosts,
-				allHosts: defaultHosts,
+				allHosts: defaultAll,
 				userHosts: defaultHosts,
 				localHost: defaultLocal,
-				metadataFilterHosts: defaultHosts
+				metadataFilterHosts: defaultHosts,
+				hubNames: defaultNames
 			},
 			state = getSessionStorageState();
 
@@ -218,11 +232,13 @@ define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 			sidebarCheck = document.getElementById("sidebarCheck" + host),
 			nodeHubPage = document.getElementById("statusHub" + host),
 			nodeHubLabel = document.getElementById("hubLabel" + host),
-			nodeHubCheck = document.getElementById("checkbox" + host);
+			nodeHubCheck = document.getElementById("checkbox" + host),
+			label = defaultNames[host]? defaultNames[host]+" -- "+host:host,
+			shortLabel = defaultNames[host]? defaultNames[host]:host;
 
 		if (node) {
 			node.parentNode.replaceChild(
-				dom_helper.elt(display[status].el, dom_helper.hrefLink(host + display[status].msg,
+				dom_helper.elt(display[status].el, dom_helper.hrefLink(shortLabel + display[status].msg,
 					"../datapages/?host=" + host)), node);
 		}
 		if (sidebarNode && (status === "dead" || status === "slow")) {
@@ -231,12 +247,12 @@ define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 		}
 		if (sidebarNode && (status === "live_selected" || status === "live_unselected" || status ==="nodata")){
 				sidebarNode.parentNode.replaceChild(
-					dom_helper.elt(display[status].el, dom_helper.hrefLink(host + display[status].msg,
+					dom_helper.elt(display[status].el, dom_helper.hrefLink( shortLabel+ display[status].msg,
 						"../datapages/?host=" + host)), sidebarNode);
 		}
 		if (nodeHubPage) {
 			nodeHubPage.parentNode.replaceChild(
-				dom_helper.elt(displayHubPage[status].el, dom_helper.hrefLink(host + displayHubPage[status].msg,
+				dom_helper.elt(displayHubPage[status].el, dom_helper.hrefLink(label + displayHubPage[status].msg,
 					"../datapages/?host=" + host)), nodeHubPage);
 		}
 		if (nodeHubLabel && displayHubLabel[status]){
