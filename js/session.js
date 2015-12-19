@@ -10,11 +10,30 @@ define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 	var defaultLocal = "https://local.xena.ucsc.edu:7223",
 		defaultUCSC ="https://genome-cancer.ucsc.edu:443/proj/public/xena",
 		defaultTCGA ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7222",
-		defaultNames ={};
+		defaultICGC ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7224",
+		defaultTreehouse ="http://ec2-52-8-94-52.us-west-1.compute.amazonaws.com:7222",
+		defaultNames ={},
+		defaultAllHubs,
+		defaultHosts;
 
 	defaultNames[defaultLocal]="Local Hub";
 	defaultNames[defaultUCSC]="UCSC Public Main Hub";
-	defaultNames[defaultTCGA]="TCGA Hub";
+	defaultNames[defaultTCGA]="TCGA Mirror";
+	defaultNames[defaultICGC]="ICGC Mirror";
+	defaultNames[defaultTreehouse]="Treehouse Mirror";
+
+	defaultAllHubs =[
+		defaultUCSC,
+		defaultTCGA,
+		defaultTreehouse,
+		defaultICGC,
+		defaultLocal
+	];
+
+	defaultHosts = [
+		defaultUCSC,
+		defaultLocal
+	];
 
 	function xenaHeatmapStateReset() {
 		var xenaStateResets = {
@@ -77,18 +96,9 @@ define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 	}
 
 	function sessionStorageInitialize() {
-		var defaultHosts = [
-				defaultUCSC,
-				defaultLocal
-			],
-			defaultAll =[
-				defaultUCSC,
-				defaultTCGA,
-				defaultLocal
-			],
-			defaultState = {
+		var defaultState = {
 				activeHosts: defaultHosts,
-				allHosts: defaultAll,
+				allHosts: defaultAllHubs,
 				userHosts: defaultHosts,
 				localHost: defaultLocal,
 				metadataFilterHosts: defaultHosts
@@ -241,7 +251,7 @@ define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 			nodeHubPage = document.getElementById("statusHub" + host),
 			nodeHubLabel = document.getElementById("hubLabel" + host),
 			nodeHubCheck = document.getElementById("checkbox" + host),
-			label = defaultNames[host]? defaultNames[host]+" -- "+host:host,
+			label = defaultNames[host]? defaultNames[host] : host,
 			shortLabel = defaultNames[host]? defaultNames[host]:host;
 
 		if (node) {
