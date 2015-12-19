@@ -10,7 +10,7 @@ define(["dom_helper", "session", "xenaQuery", "../css/hub.css"], function (dom_h
 		 	tmpNode = document.createElement("result2"),
 			label = session.getHubName(host);
 
-		tmpNode.appendChild(dom_helper.hrefLink(label +" -- "+ host+" (connecting)", "../datapages/?host=" + host));
+		tmpNode.appendChild(dom_helper.hrefLink(label +" (connecting)", "../datapages/?host=" + host));
 		tmpNode.setAttribute("id", "statusHub" + host);
 		checkbox.appendChild(tmpNode);
 		return dom_helper.elt("h4", checkbox);

@@ -143,8 +143,8 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 		cohortHeatmapButton(cohortName, _.intersection(activeHosts, userHosts), tmpNode);
 
 		// new status
-		tmpNode = document.createElement("a");
-		tmpNode.setAttribute("href", link);
+		tmpNode = document.createElement("span");
+		liNode.appendChild(tmpNode);
 
 		xenaQuery.dataset_list(hosts, cohortName).subscribe( function (s) {
 			var datasetsList= _.flatten(s.map(function(obj){
@@ -157,8 +157,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 					d2 =  new Date(ds.version);
 					dGap = (d1.getTime()-d2.getTime())/(1000 *60*60*24); //days
 					if (dGap <newVersionThresholdDays){
-						tmpNode.appendChild(buildNewImage());
-						liNode.appendChild(tmpNode);
+						liNode.replaceChild(buildNewImage(),tmpNode);
 						return true;
 					} else {
 						return false;
@@ -427,8 +426,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 							}
 
 							// new
-							tmpNode = document.createElement("a");
-							tmpNode.setAttribute("href", link);
+							tmpNode = document.createElement("span");
 							datasetNode.appendChild(tmpNode);
 							if (dataVersion[fullname]){
 								var d1 = new Date(),
@@ -1544,6 +1542,7 @@ define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "
 
 		tmpNode.setAttribute("id", "status" + host);
 		node.appendChild(dom_helper.elt("h2", tmpNode));
+		node.appendChild(document.createTextNode("Hub Address: " +host));
 		session.updateHostStatus(host);
 
 		// cohort list
