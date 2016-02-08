@@ -2,7 +2,7 @@
 /*global define: false */
 /*global require: false, module: false */
 
-define(["xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
+define(["./xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 	'use strict';
 
 	var GOODSTATUS = "loaded";

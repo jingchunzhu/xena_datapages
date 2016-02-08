@@ -2,7 +2,7 @@
 /*global define: false, confirm: true */
 /*global require: false, module: false */
 
-define(["dom_helper", "xenaQuery", "session", "underscore", "rx", "xenaAdmin", "./dataPagesGPosition",
+define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaAdmin", "./dataPagesGPosition",
 	'lunr',  "rx-dom", "../css/datapages.css"],
 	function (dom_helper, xenaQuery, session, _, Rx, xenaAdmin, dataPagesGPosition, lunr) {
 	'use strict';

@@ -5,7 +5,7 @@
 // To add new pages, extend the condition with additional url patterns
 // and require.ensure() blocks.
 
-var config = require('config');
+var config = require('./config');
 
 __webpack_public_path__ = config.baseurl; // eslint-disable-line camelcase
 
@@ -16,9 +16,9 @@ __webpack_public_path__ = config.baseurl; // eslint-disable-line camelcase
 var path = document.location.pathname;
 
 if (path.match(/^\/$/)) {
-	require.ensure(['index'], function () {
+	require.ensure(['./index'], function () {
     // XXX see above
-    require(['index']); // eslint-disable-line no-unused-expressions
+    require(['./index']); // eslint-disable-line no-unused-expressions
 	});
 }
 else if (path.match(/^\/datapages/)) {
