@@ -274,8 +274,6 @@ min-width: 30px;
   width:100px;
   height:100px;
   position:relative;
-  margin-left: auto;
-  margin-right: auto;
   -webkit-animation: rotating 2s linear infinite reverse;
   animation: rotating 2s linear infinite reverse;
 }
@@ -295,7 +293,7 @@ min-width: 30px;
   height: 10px;
   border-radius:50%;
   background: black;
-  position: s;
+  position: absolute;
   top: 45px;
   left: 45px;
 }

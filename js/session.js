@@ -11,22 +11,25 @@ define(["./xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 		defaultUCSC ="https://genome-cancer.ucsc.edu:443/proj/public/xena",
 		defaultTCGA ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7222",
 		defaultICGC ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7224",
+		defaultTOIL ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7226",
 		defaultTreehouse ="http://ec2-52-8-94-52.us-west-1.compute.amazonaws.com:7222",
 		defaultNames ={},
 		defaultAllHubs,
 		defaultHosts;
 
-	defaultNames[defaultLocal]="Local Hub";
-	defaultNames[defaultUCSC]="UCSC Public Main Hub";
-	defaultNames[defaultTCGA]="TCGA Mirror";
-	defaultNames[defaultICGC]="ICGC Mirror";
-	defaultNames[defaultTreehouse]="Treehouse Mirror";
+	defaultNames[defaultLocal]="Your computer hub";
+	defaultNames[defaultUCSC]="UCSC public main hub (release Nov 2015)";
+	defaultNames[defaultTCGA]="TCGA hub";
+	defaultNames[defaultICGC]="ICGC hub";
+	defaultNames[defaultTOIL]="TOIL hub";
+	defaultNames[defaultTreehouse]="Treehouse hub";
 
 	defaultAllHubs =[
 		defaultUCSC,
 		defaultTCGA,
-		defaultTreehouse,
 		defaultICGC,
+		defaultTOIL,
+		defaultTreehouse,
 		defaultLocal
 	];
 
@@ -251,7 +254,6 @@ define(["./xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 			nodeHubPage = document.getElementById("statusHub" + host),
 			nodeHubLabel = document.getElementById("hubLabel" + host),
 			nodeHubCheck = document.getElementById("checkbox" + host),
-			label = defaultNames[host]? defaultNames[host] : host,
 			shortLabel = defaultNames[host]? defaultNames[host]:host;
 
 		if (node) {
@@ -270,7 +272,7 @@ define(["./xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 		}
 		if (nodeHubPage) {
 			nodeHubPage.parentNode.replaceChild(
-				dom_helper.elt(displayHubPage[status].el, dom_helper.hrefLink(label + displayHubPage[status].msg,
+				dom_helper.elt(displayHubPage[status].el, dom_helper.hrefLink(shortLabel + displayHubPage[status].msg,
 					"../datapages/?host=" + host)), nodeHubPage);
 		}
 		if (nodeHubLabel && displayHubLabel[status]){

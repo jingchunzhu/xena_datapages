@@ -150,22 +150,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			var datasetsList= _.flatten(s.map(function(obj){
 				return _.values(_.pick(obj,'datasets'));
 			}));
-
-			datasetsList.some(function (ds){
-				if (ds.version){
-					d1 = new Date();
-					d2 =  new Date(ds.version);
-					dGap = (d1.getTime()-d2.getTime())/(1000 *60*60*24); //days
-					if (dGap <newVersionThresholdDays){
-						liNode.replaceChild(buildNewImage(),tmpNode);
-						return true;
-					} else {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			});
 		});
 
 		node.appendChild(liNode);
@@ -186,17 +170,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
   	  img.height = "40";
     }
     return img;
-	}
-
-	function buildNewImage () {
-		var node = document.createElement("span"),
-			img = new Image();
-
-  	img.src = newImgSource;
-  	img.height = "12";
-  	node.appendChild(img);
-		adhocTooltip (node, img, "new data ..." );
-    return node;
 	}
 
 	function buildInfoImage (tipMessage) {
@@ -428,15 +401,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 							// new
 							tmpNode = document.createElement("span");
 							datasetNode.appendChild(tmpNode);
-							if (dataVersion[fullname]){
-								var d1 = new Date(),
-									d2 =  new Date(dataVersion[fullname]),
-									dGap = (d1.getTime()-d2.getTime())/(1000 *60*60*24); //days
-								if (dGap <newVersionThresholdDays){
-									tmpNode.appendChild(buildNewImage());
-									tmpNode.appendChild(document.createTextNode(" "));
-								}
-							}
 
 							// host
 							tmpNode = dom_helper.hrefLink(dataHostShortLabel[fullname], "?host=" + dataHost[fullname]);
@@ -1181,13 +1145,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		);
 	}
   function xenaTextValuesToString (textObj){
-    var s ="";
-    for (var key in textObj) {
-      if (textObj[key]){
-        s= " "+s+textObj[key];
-      }
-    }
-    return s;
+    return JSON.stringify(textObj);
   }
 
   function buildIndex (idxObj, hosts){
@@ -1221,9 +1179,8 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
     });
 
     function addToIndex(){
+
       //about cohort
-
-
       cohortC.map(function (cohort){
         i=i+1;
         doc = {
@@ -1238,6 +1195,10 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
         };
       });
 
+      //idxObj.index = idx;
+      //idxObj.store = store;
+
+
       var mergedArray = [],
         arrays;
 
@@ -1246,14 +1207,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
         return xenaQuery.dataset_list(hosts, cohort);
       });
       mergedArray =mergedArray.concat.apply([], arrays);
-
-      //about samples
-      arrays =  hosts.map(function (host) {
-        return cohortC.map(function (cohort) {
-          return xenaQuery.all_samples(host, cohort);
-        });
-      });
-      mergedArray =mergedArray.concat.apply(mergedArray, arrays);
 
       source = Rx.Observable.zipArray(mergedArray); // concat((...args) => args)
 
@@ -1288,29 +1241,10 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
           cohortCounter = cohortCounter+1;
         });
 
-        cohortCounter =0;
-        x.slice(cohortC.length,x.length).forEach(function (samples){
-        	var cohortName = cohortC[cohortCounter % cohortC.length];
-          samples.forEach(function (sample){
-            i=i+1;
-            doc = {
-              "title":sample,
-              "body": cohortName,
-              "id":i
-            };
-            idx.add(doc);
-            store[i]= {
-              "type":"sample",
-              "name":sample,
-              "cohort":cohortName
-            };
-          });
-          cohortCounter = cohortCounter+1;
-        });
-
         idxObj.index = idx;
         idxObj.store = store;
       });
+
     }
   }
 
@@ -1329,7 +1263,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			sectionNode.appendChild(inputBox);
 
 			searchButton.setAttribute("class","vizbutton");
-			searchButton.appendChild(document.createTextNode("Search"));
+			searchButton.appendChild(document.createTextNode("Search Cohort"));
 			sectionNode.appendChild(searchButton);
 
 			searchButton.addEventListener("click", function () {
@@ -1373,11 +1307,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		  			if (cohortList.indexOf(cohort)===-1){
 		  				cohortList.push(cohort);
 		  			}
-		  		} else if (type === "sample"){
-						sampleList.push(store[obj.ref]);
-		  			if (cohortList.indexOf(cohort)===-1){
-		  				cohortList.push(cohort);
-		  			}
 		  		}
 		  	});
 
@@ -1389,20 +1318,19 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		  		cohortNode.appendChild(document.createTextNode(" - did not find any data."));
 		  	}
 		  	else {
-		  		var text = "Found ",
+		  		var text = "Found approx ",
 		  			message,
 		  			clearnArray;
 
 		  		array = [(cohortList.length ? (cohortList.length.toLocaleString()  +" cohort"+  (cohortList.length>1? "s":"")) : ""),
-		  			(datasetList.length ? (datasetList.length.toLocaleString()+" dataset"+ (datasetList.length>1? "s":"")) : ""),
-		  			(sampleList.length ? (sampleList.length.toLocaleString()  +" sample"+ (sampleList.length>1? "s":"")) : "")];
+		  			(datasetList.length ? (datasetList.length.toLocaleString()+" dataset"+ (datasetList.length>1? "s":"")) : "")];
 
 		  		clearnArray= array.filter(function (phrase) {
 		  				return (phrase !== "");
 		  			});
 
 		  		var arrayText = clearnArray.slice(0, clearnArray.length-1).join(', ');
-		  		arrayText = (arrayText ? (arrayText +" and "):"")+ clearnArray[clearnArray.length-1]+".";
+		  		arrayText = (arrayText ? (arrayText +" and "):"")+ clearnArray[clearnArray.length-1];
 		  		text = text + arrayText;
 					message = dom_helper.elt("span",text);
 					message.style.color = "gray";
@@ -1416,7 +1344,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		  			cohortNode.appendChild(document.createElement("br"));
 					});
 			  }
-			  if (datasetList.length>0){
+			  /*if (datasetList.length>0){
 			  	cohortNode.appendChild(dom_helper.elt("h2",array[1]));
 			  	datasetList.slice(0,30).forEach(function(obj){
 			  		url = "?dataset="+encodeURIComponent(obj.name)+"&host="+encodeURIComponent(obj.host);
@@ -1442,32 +1370,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			  		};
 			  	}
 			  }
-			  if (sampleList.length>0){
-			  	cohortNode.appendChild(dom_helper.elt("h2",array[2]));
-			  	sampleList.slice(0,30).forEach(function(obj){
-			  		url = "?sample="+encodeURIComponent(obj.name)+"&cohort="+encodeURIComponent(obj.cohort);
-			  		cohortNode.appendChild(document.createTextNode(obj.cohort+" : "));
-			  		cohortNode.appendChild(dom_helper.hrefLink(obj.name, url));
-			  		cohortNode.appendChild(document.createElement("br"));
-		  		});
-		  		if (sampleList.length>30){
-			  		cohortNode.appendChild(document.createElement("br"));
-			  		tmpSampleNode =dom_helper.elt("a","Click to see all the remaining samples ...");
-			  		tmpSampleNode.setAttribute("class","textLink");
-			  		cohortNode.appendChild(tmpSampleNode);
-
-			  		tmpSampleNode.onclick = function (){
-							var node =document.createElement("div");
-			  			sampleList.slice(30,sampleList.length).forEach(function(obj){
-					  		url = "?sample="+encodeURIComponent(obj.name)+"&cohort="+encodeURIComponent(obj.cohort);
-					  		node.appendChild(document.createTextNode(obj.cohort+" : "));
-					  		node.appendChild(dom_helper.hrefLink(obj.name, url));
-					  		node.appendChild(document.createElement("br"));
-			  			});
-			  			cohortNode.replaceChild(node, tmpSampleNode);
-			  		};
-			  	}
-			  }
+				*/
 			  cohortNode.appendChild(document.createElement("br"));
 			 	inputBox.disabled = false;
 				searchButton.disabled = false;
@@ -1685,10 +1588,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			'unknown': "unknown"
 		},
 		treehouseImg = require('../images/Treehouse.jpg'),
-		newImgSource = require('../images/new.jpg'),
-		infoImgSource = require('../images/Info.png'),
-		newVersionThresholdDays = 30;
-
+		infoImgSource = require('../images/Info.png');
 
 	session.sessionStorageInitialize();
 	var state = JSON.parse(sessionStorage.state),
