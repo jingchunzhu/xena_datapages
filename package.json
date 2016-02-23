@@ -42,11 +42,13 @@
     "webpack": "^1.5.3",
     "webpack-dev-server": "^1.7.0"
   },
+  "peerDependencies": {
+    "react": "^0.13.1",
+    "react-bootstrap": "^0.20.0"
+  },
   "dependencies": {
     "babel-runtime": "^5.1.13",
     "bootstrap": "^3.3.4",
-    "react": "^0.13.1",
-    "react-bootstrap": "^0.20.0",
     "rx": "^2.4.3",
     "rx-dom": "^4.0.4",
     "underscore": "^1.7.0",
