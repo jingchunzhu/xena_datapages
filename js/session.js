@@ -38,14 +38,11 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 
 	function xenaHeatmapStateReset() {
 		var xenaStateResets = {
-				samples: [],
-				samplesFrom: "",
-				zoomIndex: 0,
-				zoomCount: 100,
-				column_rendering: {},
-				column_order: [],
-				cohort: "",
-				mode: "heatmap"
+				mode: 'heatmap',
+				zoom: {height: 300},
+				columns: {},
+				columnOrder: [],
+				samples: []
 			},
 			state = sessionStorage.xena ? JSON.parse(sessionStorage.xena) : {servers: {user: []}};
 		sessionStorage.xena = JSON.stringify(_.extend(state, xenaStateResets));
