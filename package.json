@@ -18,7 +18,10 @@
     "NOTICE",
     "dist",
     "css",
-    "images"
+    "images",
+    "hub.js",
+    "datapages.js",
+    "session.js"
   ],
   "author": "Brian Craft",
   "devDependencies": {
