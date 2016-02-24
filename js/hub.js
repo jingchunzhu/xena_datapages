@@ -7,10 +7,9 @@ define(["./dom_helper", "./session", "./xenaQuery", "../css/hub.css"], function 
 	function newHubNode(host) {
 		//build checkbox
 		var checkbox = session.hostCheckBox(host),
-		 	tmpNode = document.createElement("result2"),
-			label = session.getHubName(host);
-
-		tmpNode.appendChild(dom_helper.hrefLink(label +" (connecting)", "../datapages/?host=" + host));
+			label = session.getHubName(host),
+			tmpNode = dom_helper.elt("result2",
+					dom_helper.hrefLink(label + " (connecting)", "../datapages/?host=" + host));
 		tmpNode.setAttribute("id", "statusHub" + host);
 		checkbox.appendChild(tmpNode);
 		return dom_helper.elt("h4", checkbox);
