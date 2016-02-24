@@ -5,7 +5,6 @@
 define(["./xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 	'use strict';
 
-	var GOODSTATUS = "loaded";
 	var dom_helper = require('./dom_helper');
 	var defaultLocal = "https://local.xena.ucsc.edu:7223",
 		defaultUCSC ="https://genome-cancer.ucsc.edu:443/proj/public/xena",
@@ -16,6 +15,7 @@ define(["./xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 		defaultNames ={},
 		defaultAllHubs,
 		defaultHosts,
+		GOODSTATUS = "loaded",
 		sessionStorage = window.sessionStorage;
 
 	defaultNames[defaultLocal]="Your computer hub";
