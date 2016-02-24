@@ -1,11 +1,8 @@
 /*jslint browser:true */
 /*global define: false */
-/*global require: false, module: false */
-
-define(["./xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
+define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery, Rx, dom_helper, _) {
 	'use strict';
 
-	var dom_helper = require('./dom_helper');
 	var defaultLocal = "https://local.xena.ucsc.edu:7223",
 		defaultUCSC ="https://genome-cancer.ucsc.edu:443/proj/public/xena",
 		defaultTCGA ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7222",
