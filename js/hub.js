@@ -4,6 +4,7 @@
 define(["./dom_helper", "./session", "./xenaQuery", "../css/hub.css"], function (dom_helper, session, xenaQuery) {
 	'use strict';
 
+	var hosts;
 	function newHubNode(host) {
 		//build checkbox
 		var checkbox = session.hostCheckBox(host),
@@ -49,40 +50,41 @@ define(["./dom_helper", "./session", "./xenaQuery", "../css/hub.css"], function 
 		session.updateHostStatus(host);
 	}
 
-	session.sessionStorageInitialize();
-	var state = JSON.parse(sessionStorage.state),
-		hosts = state.allHosts,
-		node = dom_helper.sectionNode("hub"),
-		newText, addbutton;
+	return function (main) {
+		session.sessionStorageInitialize();
+		hosts = JSON.parse(sessionStorage.state).allHosts;
+		var node = dom_helper.sectionNode("hub"),
+			newText, addbutton;
 
-	node.appendChild(dom_helper.elt("h2", "Data Hubs"));
-	node.appendChild(dom_helper.elt("br"));
-
-	//list of hosts
-	hosts.forEach(function (host) {
-		node.appendChild(newHubNode(host));
+		node.appendChild(dom_helper.elt("h2", "Data Hubs"));
 		node.appendChild(dom_helper.elt("br"));
-		session.updateHostStatus(host);
+
+		//list of hosts
+		hosts.forEach(function (host) {
+			node.appendChild(newHubNode(host));
+			node.appendChild(dom_helper.elt("br"));
+			session.updateHostStatus(host);
 		});
 
-	// Add host text box
-	node.appendChild(dom_helper.sectionNode("hub"));
-	newText = document.createElement("INPUT");
-	newText.setAttribute("class", "tb5");
-	newText.setAttribute("id", "textHub");
-	node.appendChild(newText);
+		// Add host text box
+		node.appendChild(dom_helper.sectionNode("hub"));
+		newText = document.createElement("INPUT");
+		newText.setAttribute("class", "tb5");
+		newText.setAttribute("id", "textHub");
+		node.appendChild(newText);
 
-	// Add button
-	addbutton = document.createElement("BUTTON");
-	addbutton.setAttribute("class","vizbutton");
-	addbutton.appendChild(document.createTextNode("Add"));
-	addbutton.addEventListener("click", function() {
-  	addHost();
-	});
-	addbutton.style.marginLeft="20px";
-	addbutton.style.height ="27px";
-	node.appendChild(addbutton);
-	node.appendChild(dom_helper.elt("br"));
+		// Add button
+		addbutton = document.createElement("BUTTON");
+		addbutton.setAttribute("class", "vizbutton");
+		addbutton.appendChild(document.createTextNode("Add"));
+		addbutton.addEventListener("click", function() {
+			addHost();
+		});
+		addbutton.style.marginLeft = "20px";
+		addbutton.style.height = "27px";
+		node.appendChild(addbutton);
+		node.appendChild(dom_helper.elt("br"));
 
-	document.getElementById('main').appendChild(node);
+		main.appendChild(node);
+	}
 });
