@@ -21,7 +21,8 @@
     "images",
     "hub.js",
     "datapages.js",
-    "session.js"
+    "session.js",
+    "controller.js"
   ],
   "author": "Brian Craft",
   "devDependencies": {
