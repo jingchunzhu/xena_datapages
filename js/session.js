@@ -15,7 +15,8 @@ define(["./xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 		defaultTreehouse ="http://ec2-52-8-94-52.us-west-1.compute.amazonaws.com:7222",
 		defaultNames ={},
 		defaultAllHubs,
-		defaultHosts;
+		defaultHosts,
+		sessionStorage = window.sessionStorage;
 
 	defaultNames[defaultLocal]="Your computer hub";
 	defaultNames[defaultUCSC]="UCSC public main hub (release Nov 2015)";
@@ -319,7 +320,8 @@ define(["./xenaQuery", "rx", "underscore"], function (xenaQuery, Rx, _) {
 		metaDataFilterCheckBox: metaDataFilterCheckBox,
 		xenaHeatmapSetCohort: xenaHeatmapSetCohort,
 		getHubName: getHubName,
-		datasetHasFloats:datasetHasFloats,
+		datasetHasFloats: datasetHasFloats,
+		setSessionStorage: ss => {sessionStorage = ss},
 
 		GOODSTATUS: GOODSTATUS
 	};
