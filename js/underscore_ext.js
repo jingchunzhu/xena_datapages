@@ -1,5 +1,5 @@
 /*globals define: false */
-define(['underscore'], function(_) {
+define(['underscore', './immutable'], function(_, immutable) {
 	'use strict';
 
 	// Concat array with following arguments
@@ -16,6 +16,7 @@ define(['underscore'], function(_) {
 	_.mixin({
 		findValue: findValue,
 		flatmap: _.compose(_.partial(_.flatten, _, 1), _.map),
+		...immutable
 	});
 
 	return _;

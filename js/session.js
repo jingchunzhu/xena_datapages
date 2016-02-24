@@ -1,7 +1,7 @@
 /*eslint strict: [2, "function"], camelcase: 0, no-use-before-define: 0 */
 /*eslint-env browser */
 /*global define: false */
-define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery, Rx, dom_helper, _) {
+define(["xenaQuery", "rx", "dom_helper", "underscore_ext", "./controller"], function (xenaQuery, Rx, dom_helper, _, controller) {
 	'use strict';
 
 	var defaultLocal = "https://local.xena.ucsc.edu:7223",
@@ -13,8 +13,7 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 		defaultNames = {},
 		defaultAllHubs,
 		defaultHosts,
-		GOODSTATUS = "loaded",
-		sessionStorage = window.sessionStorage;
+		GOODSTATUS = "loaded";
 
 	defaultNames[defaultLocal] = "Your computer hub";
 	defaultNames[defaultUCSC] = "UCSC public main hub (release Nov 2015)";
@@ -37,61 +36,31 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 		defaultLocal
 	];
 
-	function xenaHeatmapStateReset() {
-		var xenaStateResets = {
-				mode: 'heatmap',
-				zoom: {height: 300},
-				columns: {},
-				columnOrder: [],
-				samples: []
-			},
-			state = sessionStorage.xena ? JSON.parse(sessionStorage.xena) : {servers: {user: []}};
-		sessionStorage.xena = JSON.stringify(_.extend(state, xenaStateResets));
+	var xenaStateResets = {
+			mode: 'heatmap',
+			zoom: {height: 300},
+			columns: {},
+			columnOrder: [],
+			samples: []
+		};
+	var xenaStateInit = {...xenaStateResets, servers: {user: []}};
+
+	function sessionStorageCallback(ev) {
+		var state = sessionStorage.xena ? JSON.parse(sessionStorage.xena) : xenaStateInit;
+		sessionStorage.xena = JSON.stringify(controller.action(state, ev));
 	}
 
-	function xenaHeatmapSetCohort(cohortname) {
-		var xenaState = {
-				cohort: cohortname
-			},
-			state = sessionStorage.xena ? JSON.parse(sessionStorage.xena) : {servers: {user: []}};
+	var callback = sessionStorageCallback;
 
-		if ( state.cohort && state.cohort !== cohortname) {
-			xenaHeatmapStateReset();
-			state = sessionStorage.xena ? JSON.parse(sessionStorage.xena) : {servers: {user: []}};
-		}
-		sessionStorage.xena = JSON.stringify(_.extend(state, xenaState));
+	function xenaHeatmapSetCohort(cohortname) {
+		callback(['cohort', cohortname]);
 	}
 
 	//set xena user server
 	function setXenaUserServer() {
-		if (!sessionStorage.xena) {
-			xenaHeatmapStateReset();
-		}
-
-		var state = JSON.parse(sessionStorage.xena);
-
-		state.servers.user = _.intersection(JSON.parse(sessionStorage.state).activeHosts,
-			JSON.parse(sessionStorage.state).userHosts);
-
-		sessionStorage.xena = JSON.stringify(state);
-	}
-
-	// XXX should not have subscribe inside a subscribe. Instead,
-	// use a combinator on the two streams & subscribe to the result.
-	function datasetHasFloats (host, dsName, action, actionArgs) {
-		xenaQuery.dataset_field_examples(host, dsName).subscribe(function (s) {
-			var probes = s.map(function (probe) {
-				return probe.name;
-			});
-			xenaQuery.code_list(host, dsName, probes).subscribe(function(codemap){
-				for(var key in codemap) {
-					if (codemap.hasOwnProperty(key) && !codemap[key]){  // no code, float feature
-						action.apply(this, actionArgs);
-						return;
-					}
-		    }
-			});
-		});
+		let {activeHosts, userHosts} = JSON.parse(sessionStorage.state),
+			servers = _.intersection(activeHosts, userHosts);
+		callback(['servers', servers]);
 	}
 
 	function sessionStorageInitialize() {
@@ -182,12 +151,13 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 					//removeHostFromListInSession('metadataFilterHosts', host);
 
 					//check if host that will be removed has the "cohort" in the xena heatmap state setting ///////////TODO
-					xenaQuery.all_cohorts(host).subscribe(function (s) {
-						var xenaState = JSON.parse(sessionStorage.xena);
-						if (xenaState.cohort && _.contains(s, xenaState.cohort)) { // reset xenaHeatmap
-							xenaHeatmapStateReset();
-						}
-					});
+// XXX This seems wrong. If the cohort is on multiple hosts, it still resets the heatmap.
+//					xenaQuery.all_cohorts(host).subscribe(function (s) {
+//						var xenaState = JSON.parse(sessionStorage.xena);
+//						if (xenaState.cohort && _.contains(s, xenaState.cohort)) { // reset xenaHeatmap
+//							xenaHeatmapStateReset();
+//						}
+//					});
 				}
 				setXenaUserServer();
 				checkBoxLabel();
@@ -315,8 +285,7 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 		metaDataFilterCheckBox: metaDataFilterCheckBox,
 		xenaHeatmapSetCohort: xenaHeatmapSetCohort,
 		getHubName: getHubName,
-		datasetHasFloats: datasetHasFloats,
-		setSessionStorage: ss => {sessionStorage = ss},
+		setCallback: cb => {callback = cb},
 
 		GOODSTATUS: GOODSTATUS
 	};
