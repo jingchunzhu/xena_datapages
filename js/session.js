@@ -1,28 +1,29 @@
-/*jslint browser:true */
+/*eslint strict: [2, "function"], camelcase: 0, no-use-before-define: 0 */
+/*eslint-env browser */
 /*global define: false */
 define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery, Rx, dom_helper, _) {
 	'use strict';
 
 	var defaultLocal = "https://local.xena.ucsc.edu:7223",
-		defaultUCSC ="https://genome-cancer.ucsc.edu:443/proj/public/xena",
-		defaultTCGA ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7222",
-		defaultICGC ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7224",
-		defaultTOIL ="http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7226",
-		defaultTreehouse ="http://ec2-52-8-94-52.us-west-1.compute.amazonaws.com:7222",
-		defaultNames ={},
+		defaultUCSC = "https://genome-cancer.ucsc.edu:443/proj/public/xena",
+		defaultTCGA = "http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7222",
+		defaultICGC = "http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7224",
+		defaultTOIL = "http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7226",
+		defaultTreehouse = "http://ec2-52-8-94-52.us-west-1.compute.amazonaws.com:7222",
+		defaultNames = {},
 		defaultAllHubs,
 		defaultHosts,
 		GOODSTATUS = "loaded",
 		sessionStorage = window.sessionStorage;
 
-	defaultNames[defaultLocal]="Your computer hub";
-	defaultNames[defaultUCSC]="UCSC public main hub (release Nov 2015)";
-	defaultNames[defaultTCGA]="TCGA hub";
-	defaultNames[defaultICGC]="ICGC hub";
-	defaultNames[defaultTOIL]="TOIL hub";
-	defaultNames[defaultTreehouse]="Treehouse hub";
+	defaultNames[defaultLocal] = "Your computer hub";
+	defaultNames[defaultUCSC] = "UCSC public main hub (release Nov 2015)";
+	defaultNames[defaultTCGA] = "TCGA hub";
+	defaultNames[defaultICGC] = "ICGC hub";
+	defaultNames[defaultTOIL] = "TOIL hub";
+	defaultNames[defaultTreehouse] = "Treehouse hub";
 
-	defaultAllHubs =[
+	defaultAllHubs = [
 		defaultUCSC,
 		defaultTCGA,
 		defaultICGC,
@@ -54,7 +55,7 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 			},
 			state = sessionStorage.xena ? JSON.parse(sessionStorage.xena) : {servers: {user: []}};
 
-		if ( state.cohort && state.cohort!==cohortname) {
+		if ( state.cohort && state.cohort !== cohortname) {
 			xenaHeatmapStateReset();
 			state = sessionStorage.xena ? JSON.parse(sessionStorage.xena) : {servers: {user: []}};
 		}
@@ -85,7 +86,7 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 			xenaQuery.code_list(host, dsName, probes).subscribe(function(codemap){
 				for(var key in codemap) {
 					if (codemap.hasOwnProperty(key) && !codemap[key]){  // no code, float feature
-						action.apply(this,actionArgs);
+						action.apply(this, actionArgs);
 						return;
 					}
 		    }
@@ -148,21 +149,21 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 
 		function checkBoxLabel() {
 			if (checkbox.checked){
-				labelText.style.color="gray";
-				labelText.innerHTML= "selected";
+				labelText.style.color = "gray";
+				labelText.innerHTML = "selected";
 			}
 			else {
-				labelText.innerHTML= "&nbsp";
+				labelText.innerHTML = "&nbsp";
 			}
 			updateHostStatus(host);
 		}
 
 		checkbox.setAttribute("type", "checkbox");
 		checkbox.setAttribute("id", "checkbox" + host);
-		checkbox.setAttribute("class","hubcheck");
+		checkbox.setAttribute("class", "hubcheck");
 		checkbox.checked = _.contains(userHosts, host);
 		labelText.setAttribute("for", "checkbox" + host);
-		labelText.setAttribute("id", "hubLabel"+host);
+		labelText.setAttribute("id", "hubLabel" + host);
 		checkBoxLabel();
 
 		node.appendChild(checkbox);
@@ -197,7 +198,7 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 	}
 
 	function metaDataFilterCheckBox(host, ifChangedAction) {
-		var metadataFilterHosts= JSON.parse(sessionStorage.state).metadataFilterHosts,
+		var metadataFilterHosts = JSON.parse(sessionStorage.state).metadataFilterHosts,
 				checkbox = document.createElement("INPUT");
 
 		checkbox.setAttribute("type", "checkbox");
@@ -229,18 +230,18 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 				'live_unselected': {msg: ' (running, not in your data hubs)', el: 'result2'},
 				'dead': {msg: ' (not running)', el: 'result2'},
 				'nodata': {msg: ' (no data)', el: 'result2'},
-				'slow': {msg: ' (there is a problem)', el: 'result2'},
+				'slow': {msg: ' (there is a problem)', el: 'result2'}
 			},
 			displayHubPage = {
 				'live_selected': {msg: '', el: 'result'},
 				'live_unselected': {msg: '', el: 'result'},
 				'dead': {msg: ' (not running)', el: 'result2'},
 				'nodata': {msg: ' (no data)', el: 'result2'},
-				'slow': {msg: ' (there is a problem)', el: 'result2'},
+				'slow': {msg: ' (there is a problem)', el: 'result2'}
 			},
 			displayHubLabel = {
 				'live_selected': {msg: 'connected', color: 'blue'},
-				'live_unselected': {msg: '&nbsp', color: 'white'},
+				'live_unselected': {msg: '&nbsp', color: 'white'}
 			},
 
 			node = document.getElementById("status" + host),
@@ -249,7 +250,7 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 			nodeHubPage = document.getElementById("statusHub" + host),
 			nodeHubLabel = document.getElementById("hubLabel" + host),
 			nodeHubCheck = document.getElementById("checkbox" + host),
-			shortLabel = defaultNames[host]? defaultNames[host]:host;
+			shortLabel = defaultNames[host] ? defaultNames[host] : host;
 
 		if (node) {
 			node.parentNode.replaceChild(
@@ -260,9 +261,9 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 			sidebarNode.parentNode.removeChild(sidebarNode);
 			sidebarCheck.parentNode.removeChild(sidebarCheck);
 		}
-		if (sidebarNode && (status === "live_selected" || status === "live_unselected" || status ==="nodata")){
+		if (sidebarNode && (status === "live_selected" || status === "live_unselected" || status === "nodata")){
 				sidebarNode.parentNode.replaceChild(
-					dom_helper.elt(display[status].el, dom_helper.hrefLink( shortLabel+ display[status].msg,
+					dom_helper.elt(display[status].el, dom_helper.hrefLink(shortLabel + display[status].msg,
 						"../datapages/?host=" + host)), sidebarNode);
 		}
 		if (nodeHubPage) {
@@ -272,8 +273,8 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 		}
 		if (nodeHubLabel && displayHubLabel[status]){
 			if (displayHubLabel[status].color){
-				nodeHubLabel.style.color= displayHubLabel[status].color;
-				nodeHubCheck.style.background = "linear-gradient("+displayHubLabel[status].color+", white)";
+				nodeHubLabel.style.color = displayHubLabel[status].color;
+				nodeHubCheck.style.background = "linear-gradient(" + displayHubLabel[status].color + ", white)";
 			}
 			if (displayHubLabel[status].msg) {
 				nodeHubLabel.innerHTML = displayHubLabel[status].msg;
@@ -293,7 +294,7 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext"], function (xenaQuery,
 					var duration;
 					if (s.length > 0) {
 						addHostToListInSession('activeHosts', host);
-						updateHostDOM(host, (userHosts.indexOf(host)!==-1)? 'live_selected' : 'live_unselected');
+						updateHostDOM(host, (userHosts.indexOf(host) !== -1) ? 'live_selected' : 'live_unselected');
 					} else {
 						duration = Date.now() - start;
 						removeHostFromListInSession('activeHosts', host);
