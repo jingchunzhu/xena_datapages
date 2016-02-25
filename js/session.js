@@ -6,9 +6,9 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext", "./controller"], func
 
 	var defaultLocal = "https://local.xena.ucsc.edu:7223",
 		defaultUCSC = "https://genome-cancer.ucsc.edu:443/proj/public/xena",
-		defaultTCGA = "http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7222",
-		defaultICGC = "http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7224",
-		defaultTOIL = "http://ec2-52-9-44-211.us-west-1.compute.amazonaws.com:7226",
+		defaultTCGA = "http://tcga.xenahubs.net",
+		defaultICGC = "http://icgc.xenahubs.net",
+		defaultTOIL = "http://toil.xenahubs.net",
 		defaultTreehouse = "http://ec2-52-8-94-52.us-west-1.compute.amazonaws.com:7222",
 		defaultNames = {},
 		defaultAllHubs,
