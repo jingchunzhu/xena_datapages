@@ -2,9 +2,9 @@
 /*global define: false, confirm: true */
 /*global require: false, module: false */
 
-define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaAdmin", "./dataPagesGPosition",
+define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaAdmin",
 	'lunr',  "rx-dom", "../css/datapages.css"],
-	function (dom_helper, xenaQuery, session, _, Rx, xenaAdmin, dataPagesGPosition, lunr) {
+	function (dom_helper, xenaQuery, session, _, Rx, xenaAdmin, lunr) {
 	'use strict';
 
 	// check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
@@ -1565,10 +1565,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		// all samples of a dataset
 		else if (keys.length ===4 && host && dataset && label && allSamples) {
 			allSamplesPage (host, dataset, label);
-		}
-
-		else if (keys.ga4gh){
-			dataPagesGPosition.start(query_string, baseNode);
 		}
 
 		// front page: cohort list
