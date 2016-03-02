@@ -6,9 +6,9 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext", "./controller"], func
 
 	var defaultLocal = "https://local.xena.ucsc.edu:7223",
 		defaultUCSC = "https://genome-cancer.ucsc.edu:443/proj/public/xena",
-		defaultTCGA = "http://tcga.xenahubs.net",
-		defaultICGC = "http://icgc.xenahubs.net",
-		defaultTOIL = "http://toil.xenahubs.net",
+		defaultTCGA = "https://tcga.xenahubs.net",
+		defaultICGC = "https://icgc.xenahubs.net",
+		defaultTOIL = "https://toil.xenahubs.net",
 		defaultTreehouse = "http://ec2-52-8-94-52.us-west-1.compute.amazonaws.com:7222",
 		defaultNames = {},
 		defaultAllHubs,
@@ -27,7 +27,7 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext", "./controller"], func
 		defaultTCGA,
 		defaultICGC,
 		defaultTOIL,
-		defaultTreehouse,
+		//defaultTreehouse,
 		defaultLocal
 	];
 
@@ -233,7 +233,7 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext", "./controller"], func
 		}
 		if (sidebarNode && (status === "live_selected" || status === "live_unselected" || status === "nodata")){
 				sidebarNode.parentNode.replaceChild(
-					dom_helper.elt(display[status].el, dom_helper.hrefLink(shortLabel + display[status].msg,
+					dom_helper.elt(display[status].el, dom_helper.hrefLink(shortLabel + displayHubPage[status].msg,
 						"../datapages/?host=" + host)), sidebarNode);
 		}
 		if (nodeHubPage) {

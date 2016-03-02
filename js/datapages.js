@@ -4,8 +4,13 @@
 
 define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaAdmin",
 	'lunr',  "rx-dom", "../css/datapages.css"],
-	function (dom_helper, xenaQuery, session, _, Rx, xenaAdmin, lunr) {
+	function (dom_helper, xenaQuery, session,  _,  Rx, xenaAdmin, lunr) {
 	'use strict';
+
+  var React = require('react');
+  var ReactDOM = require('react-dom');
+  var Modal = require('react-bootstrap/lib/Modal');
+  var Button = require('react-bootstrap/lib/Button');
 
 	// check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
 	function checkGenomicDataset(hosts, cohort, goodStatus) {
@@ -1086,6 +1091,16 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			sideNode.appendChild(button);
 			sideNode.appendChild(document.createElement("br"));
 		}
+
+    //download selected samples' data
+    /*
+    var mountPoint = document.createElement("div");
+    if (downloadSelecedSampleButton (dataset, mountPoint)){
+      sideNode.appendChild(mountPoint);
+      sideNode.appendChild(document.createElement("br"));
+    }
+    */
+    
 		// delete button
 		button = deleteDataButton (dataset);
 		if (button) {
@@ -1121,7 +1136,53 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		}
 	}
 
+	function downloadSelecedSampleButton (dataset, mountPoint){
+		if(dataset.status !== session.GOODSTATUS) {
+      return false;
+    }
 
+    const Example = React.createClass({
+
+      getInitialState() {
+        return { showModal: false };
+      },
+
+      close() {
+        this.setState({ showModal: false });
+      },
+
+      open() {
+        this.setState({ showModal: true });
+      },
+
+      render() {
+        return (
+          <div>
+            <Button type= "submit" className="vizbutton" onClick={this.open}>
+              Download subset
+            </Button>
+
+            <Modal show={this.state.showModal} onHide={this.close}>
+              <Modal.Header closeButton>
+                <Modal.Title>Download data from a subset of samples</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <p>Enter a list of samples separated by comma</p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button type = "submit" bsStyle="primary">Submit</Button>
+                <Button onClick={this.close}>Close</Button>
+              </Modal.Footer>
+            </Modal>
+          </div>
+        );
+      }
+    });
+
+    ReactDOM.render(< Example />, mountPoint);
+    return true;
+  }
+	
 	function bigDataSnippetPage (host, dataset, nSamples, nProbes){
 		var blockNode = dom_helper.elt("span", "If you are reading this, you need release browser SHIELD to see the data requested"),
 			rootNode = dom_helper.sectionNode("bigDataSnippet"),
@@ -1263,7 +1324,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			sectionNode.appendChild(inputBox);
 
 			searchButton.setAttribute("class","vizbutton");
-			searchButton.appendChild(document.createTextNode("Search Cohort"));
+			searchButton.appendChild(document.createTextNode("Search Cohorts"));
 			sectionNode.appendChild(searchButton);
 
 			searchButton.addEventListener("click", function () {
