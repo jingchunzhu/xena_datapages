@@ -379,17 +379,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 							datasetNode.appendChild(dom_helper.hrefLink(dataLabel[fullname], link));
 
 							//status
-							if (dataStatus[fullname] === session.GOODSTATUS && !dataWarning[fullname]) { // perfect data show sampleN
-								datasetNode.appendChild(dom_helper.valueNode(fullname + "sampleN"));
-								xenaQuery.dataset_samples(dataHost[fullname], dataName[fullname]).subscribe(function (s) {
-									document.getElementById(fullname + "sampleN").
-									appendChild(dom_helper.elt("label", document.createTextNode(" (n=" + s.length.toLocaleString() + ")")));
-								});
-							} else if (dataStatus[fullname] === session.GOODSTATUS && dataWarning[fullname]){ // show loader warning
-								tmpNode = dom_helper.hrefLink(" ["+ dataStatus[fullname]+" with warning] ","#");
-								warningPopUp (tmpNode, dataWarning[fullname]);
-								datasetNode.appendChild(tmpNode);
-
+							if (dataStatus[fullname] === session.GOODSTATUS ) { // good data, with or without warning
 								datasetNode.appendChild(dom_helper.valueNode(fullname + "sampleN"));
 								xenaQuery.dataset_samples(dataHost[fullname], dataName[fullname]).subscribe(function (s) {
 									document.getElementById(fullname + "sampleN").
@@ -402,10 +392,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 							} else {
 								datasetNode.appendChild(document.createTextNode(" ["+dataStatus[fullname]+"] "));
 							}
-
-							// new
-							tmpNode = document.createElement("span");
-							datasetNode.appendChild(tmpNode);
 
 							// host
 							tmpNode = dom_helper.hrefLink(dataHostShortLabel[fullname], "?host=" + dataHost[fullname]);
@@ -1100,7 +1086,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
       sideNode.appendChild(document.createElement("br"));
     }
     */
-    
+
 		// delete button
 		button = deleteDataButton (dataset);
 		if (button) {

@@ -23,17 +23,17 @@ define(["xenaQuery", "rx", "dom_helper", "underscore_ext", "./controller"], func
 	defaultNames[defaultTreehouse] = "Treehouse hub";
 
 	defaultAllHubs = [
+    defaultLocal,
 		defaultUCSC,
 		defaultTCGA,
 		defaultICGC,
 		defaultTOIL,
 		//defaultTreehouse,
-		defaultLocal
 	];
 
 	defaultHosts = [
-		defaultUCSC,
-		defaultLocal
+		defaultLocal,
+    defaultUCSC,
 	];
 
 	var xenaStateResets = {
