@@ -8,8 +8,8 @@ The build is based on npm and webpack.
    * On OSX, install brew http://brew.sh/
    * `brew install git`
    * `brew install node`
- * `git clone https://github.com/acthp/data_pages.git`
- * `cd data_pages`
+ * `git clone https://github.com/ucscXena/xena_datapages.git`
+ * `cd xena_datapages`
  * `npm install`
  * `npm start`
  * browse to [http://localhost:8080/webpack-dev-server/](http://localhost:8080/webpack-dev-server/)

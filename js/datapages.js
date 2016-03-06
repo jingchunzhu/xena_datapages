@@ -621,7 +621,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			}
 
 			sectionNode.appendChild(dom_helper.elt("resultsameLength",
-				dom_helper.hrefLink("probeMap", link),
+				dom_helper.hrefLink(probeMap, link),
 				document.createTextNode(";  "),
 				dom_helper.hrefLink("Metadata", metalink)));
 
