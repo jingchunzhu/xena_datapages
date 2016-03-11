@@ -1,7 +1,7 @@
 /*eslint strict: [2, "function"], camelcase: 0, no-use-before-define: 0 */
 /*eslint-env browser */
 /*global define: false */
-define(["xenaQuery", "rx", "dom_helper", "underscore_ext", "./controller"], function (xenaQuery, Rx, dom_helper, _, controller) {
+define(["./xenaQuery", "rx", "./dom_helper", "./underscore_ext", "./controller"], function (xenaQuery, Rx, dom_helper, _, controller) {
 	'use strict';
 
 	var defaultLocal = "https://local.xena.ucsc.edu:7223",

@@ -15,7 +15,7 @@ module.exports = {
 		loaders: [
 			{ test: /rx-dom/, loader: "imports?define=>false" },
 			{ test: /\.css$/, loader: "style!css" },
-			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader?optional=runtime,cacheDirectory=true'},
+			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'},
 			{ test: /\.(jpe?g|png|gif|svg|eot|woff2?|ttf)$/i, loaders: ['url?limit=10000'] }
 		]
 	},
@@ -34,7 +34,6 @@ module.exports = {
 			'rx.async$': 'rx/dist/rx.async',
 			'rx.coincidence$': 'rx/dist/rx.coincidence'
 		},
-		extensions: ['', '.js', '.json', '.coffee'],
-		root: __dirname + "/js"
+		extensions: ['', '.js', '.json', '.coffee']
 	}
 };

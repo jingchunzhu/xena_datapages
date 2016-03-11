@@ -56,9 +56,11 @@
   },
   "peerDependencies": {
     "underscore": "^1.7.0",
-    "react": "^0.13.1",
-    "react-bootstrap": "^0.20.0",
+    "react": "^0.14.7",
+    "react-bootstrap": "^0.28.2",
+    "react-dom": "^0.14.7",
     "rx": "^2.4.3",
+    "rx-dom": "^4.0.4",
     "babel-runtime": "^5.1.13"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 /*global define: false */
 
-define(['rx-dom', 'underscore_ext'], function (Rx, _) {
+define(['rx-dom', './underscore_ext'], function (Rx, _) {
     'use strict';
 
 	function expandArrays(v, k) {
