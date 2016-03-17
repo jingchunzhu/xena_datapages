@@ -458,6 +458,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 				cohort = dataset.cohort || COHORT_NULL,
 				dataType = dataset.dataSubType,
 				platform = dataset.platform,
+				unit = dataset.unit,
 				assembly = dataset.assembly,
 				version = dataset.version,
 				url = dataset.url,
@@ -600,6 +601,12 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		if (assembly) {
 			sectionNode.appendChild(dom_helper.elt("labelsameLength","assembly"));
 			sectionNode.appendChild(dom_helper.elt("resultsameLength", assembly));
+			sectionNode.appendChild(dom_helper.elt("br"));
+		}
+		//unit
+		if (unit) {
+			sectionNode.appendChild(dom_helper.elt("labelsameLength","unit"));
+			sectionNode.appendChild(dom_helper.elt("resultsameLength", unit));
 			sectionNode.appendChild(dom_helper.elt("br"));
 		}
 		//platform
@@ -1168,7 +1175,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
     ReactDOM.render(< Example />, mountPoint);
     return true;
   }
-	
+
 	function bigDataSnippetPage (host, dataset, nSamples, nProbes){
 		var blockNode = dom_helper.elt("span", "If you are reading this, you need release browser SHIELD to see the data requested"),
 			rootNode = dom_helper.sectionNode("bigDataSnippet"),
@@ -1391,33 +1398,16 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		  			cohortNode.appendChild(document.createElement("br"));
 					});
 			  }
-			  /*if (datasetList.length>0){
+			  if (datasetList.length>0){
 			  	cohortNode.appendChild(dom_helper.elt("h2",array[1]));
-			  	datasetList.slice(0,30).forEach(function(obj){
+			  	datasetList.forEach(function(obj){
 			  		url = "?dataset="+encodeURIComponent(obj.name)+"&host="+encodeURIComponent(obj.host);
 			  		cohortNode.appendChild(document.createTextNode(obj.cohort+" : "));
 			  		cohortNode.appendChild(dom_helper.hrefLink(obj.label, url));
 			  		cohortNode.appendChild(document.createElement("br"));
 		  		});
-			  	if (datasetList.length>30){
-			  		cohortNode.appendChild(document.createElement("br"));
-			  		tmpDatasetNode = dom_helper.elt("a","Click to see all the remaining datasets ...");
-			  		tmpDatasetNode.setAttribute("class","textLink");
-			  		cohortNode.appendChild(tmpDatasetNode);
-
-			  		tmpDatasetNode.onclick = function (){
-							var node =document.createElement("div");
-			  			datasetList.slice(30,datasetList.length).forEach(function(obj){
-					  		url = "?dataset="+encodeURIComponent(obj.name)+"&host="+encodeURIComponent(obj.host);
-					  		node.appendChild(document.createTextNode(obj.cohort+" : "));
-					  		node.appendChild(dom_helper.hrefLink(obj.label, url));
-					  		node.appendChild(document.createElement("br"));
-			  			});
-			  			cohortNode.replaceChild(node, tmpDatasetNode);
-			  		};
-			  	}
 			  }
-				*/
+
 			  cohortNode.appendChild(document.createElement("br"));
 			 	inputBox.disabled = false;
 				searchButton.disabled = false;
