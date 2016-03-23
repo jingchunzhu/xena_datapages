@@ -294,8 +294,8 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 
 		ifCohortExistDo (cohortName, hosts, undefined, function() {
 			// samples: N
-			node.appendChild(dom_helper.labelValueNode("samples:", cohortName + "sampleN"));
-			updateDOM_xenaCohort_sampleN(cohortName + "sampleN", hosts, cohortName);
+			//node.appendChild(dom_helper.labelValueNode("samples:", cohortName + "sampleN"));
+			//updateDOM_xenaCohort_sampleN(cohortName + "sampleN", hosts, cohortName);
 
 			//dataset list
 			xenaQuery.dataset_list(hosts, cohortName).subscribe(
