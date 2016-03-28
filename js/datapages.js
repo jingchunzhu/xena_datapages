@@ -1198,109 +1198,65 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			}
 		);
 	}
-  function xenaTextValuesToString (textObj){
-    return JSON.stringify(textObj);
-  }
 
-  function buildIndex (idxObj, hosts){
-    var idx = lunr(function () {
-        this.field('title');//, {boost: 10})
-        this.field('body');
-      }),
-      store ={},
-      i =0,
-      doc,
-			source,
-      cohortC =[];
+	function xenaTextValuesToString (dataset){
+		delete dataset.loader;
+		return JSON.stringify(dataset);
+	}
 
+	function buildIndex (idxObj, hosts){
+  		var idx = lunr(function () {
+				this.field('cohort');
+				this.field('body');
+  			}),
+		  	store ={},
+		  	i =0,
+		  	doc,
+		  	source;
 
-    source = Rx.Observable.zipArray(
-      hosts.map(function (host) {
-        return xenaQuery.all_cohorts(host);
-      })
-    );
+	    source = Rx.Observable.zipArray(
+	      hosts.map(function (host) {
+	        return xenaQuery.all_datasets(host);
+	      })
+	    );
 
+		source.subscribe(function (hostReturn) {
+			hostReturn.forEach(function(s,i){
+				s.forEach(function (dataset) {
+					addToIndex(hosts[i],dataset);
+				});
+			});
+			idxObj.index = idx;
+			idxObj.store = store;
+		});
 
-    source.subscribe(function (x) {
-      x.forEach(function(s){
-        s.forEach(function (cohort) {
-          if (cohortC.indexOf(cohort) === -1) {
-            cohortC.push(cohort);
-          }
-        });
-      });
-      addToIndex();
-    });
+		function addToIndex(host,dataset){
+			var body = xenaTextValuesToString(dataset),
+				type = dataset.type,
+				status = dataset.status;
 
-    function addToIndex(){
+			if (NOT_GENOMICS.indexOf(type)===1){
+				return;
+			}
+			if (status!==session.GOODSTATUS){
+				return;
+			}
 
-      //about cohort
-      cohortC.map(function (cohort){
-        i=i+1;
-        doc = {
-          "title": cohort,
-          "body": "cohort",
-          "id": i
-        };
-        idx.add(doc);
-        store[i]={
-          "type":"cohort",
-          "name":cohort
-        };
-      });
-
-      //idxObj.index = idx;
-      //idxObj.store = store;
-
-
-      var mergedArray = [],
-        arrays;
-
-      //about dataset
-      arrays = cohortC.map(function (cohort) {
-        return xenaQuery.dataset_list(hosts, cohort);
-      });
-      mergedArray =mergedArray.concat.apply([], arrays);
-
-      source = Rx.Observable.zipArray(mergedArray); // concat((...args) => args)
-
-      source.subscribe(function (x){
-        var cohortCounter =0;
-        x.slice(0, cohortC.length).forEach(function (hostsRet) {
-          hostsRet.forEach(function (hostObj) {
-            hostObj.datasets.forEach(function (dataset) {
-              var label= dataset.label || dataset.name;
-              var body = xenaTextValuesToString(dataset);
-              var type = dataset.type;
-
-              if (NOT_GENOMICS.indexOf(type)===1){
-                return;
-              }
-              i=i+1;
-              doc = {
-                "title": label,
-                "body": body,
-                "id": i
-              };
-              idx.add(doc);
-              store[i]={
-                "type":"dataset",
-                "name":dataset.name,
-                "label":label,
-                "cohort":cohortC[cohortCounter],
-                "host":hostObj.server
-              };
-            });
-          });
-          cohortCounter = cohortCounter+1;
-        });
-
-        idxObj.index = idx;
-        idxObj.store = store;
-      });
-
-    }
-  }
+			i=i+1;
+			doc = {
+				"cohort": dataset.cohort,
+				"body": body,
+				"id": i
+			};
+			idx.add(doc);
+			store[i]={
+				"name":dataset.name,
+				"label":dataset.label,
+				"cohort":dataset.cohort,
+				"host":host
+			};
+		};
+	}
 
 	//the front page of dataPages
 	function frontPage (baseNode){
@@ -1338,7 +1294,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 
 		function doSearch(query) {
 			var type, name, cohort, url,
-				cohortList=[], datasetList=[], sampleList=[],
+				cohortList=[], datasetList=[],
 				idx, store,
 				tiimer;
 
@@ -1349,20 +1305,13 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 
 				results= idx.search(query);
 				results.map(function (obj){
-		  		type = store[obj.ref].type;
-		  		name = store[obj.ref].name;
-		  		cohort = store[obj.ref].cohort;
-		  		if (type ==="cohort"){
-		  			if (cohortList.indexOf(name)===-1){
-		  				cohortList.push(name);
-		  			}
-		  		} else if (type ==="dataset"){
+		  			name = store[obj.ref].name;
+		  			cohort = store[obj.ref].cohort;
 		  			datasetList.push(store[obj.ref]);
 		  			if (cohortList.indexOf(cohort)===-1){
 		  				cohortList.push(cohort);
 		  			}
-		  		}
-		  	});
+				});
 
 		  	cohortNode.innerHTML="";
 

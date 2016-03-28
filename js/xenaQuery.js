@@ -169,6 +169,11 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 		       '        :where [:= :cohort ' + quote_cohort(cohort) + ']})';
 	}
 
+	function all_datasets_query() {
+		return '(query {:select [:name :type :datasubtype :probemap :text :status]\n' +
+		       '        :from [:dataset]})';
+	}
+
 	function dataset_query (dataset) {
 		return '(query {:select [:name :longtitle :type :datasubtype :probemap :text :status]\n' +
 		       '        :from [:dataset]\n' +
@@ -340,6 +345,12 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 		});
 	}
 
+	function all_datasets(server) {
+		return Rx.DOM.ajax(
+			xena_post(server, all_datasets_query())
+		).map(resp => xena_dataset_list_transform(server, json_resp(resp)));
+	}
+
 	function code_list(host, ds, probes) {
 		return Rx.DOM.ajax(
 			xena_post(host, codes_string(ds, probes))
@@ -488,6 +499,7 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 		dataset_samples: dataset_samples,
 		all_samples: all_samples,
 		all_cohorts: all_cohorts,
+		all_datasets: all_datasets,
 		dataset_by_name: dataset_by_name,
 		dataset_text: dataset_text,
 
