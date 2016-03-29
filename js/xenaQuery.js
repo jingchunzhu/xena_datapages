@@ -348,7 +348,7 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 	function all_datasets(server) {
 		return Rx.DOM.ajax(
 			xena_post(server, all_datasets_query())
-		).map(resp => xena_dataset_list_transform(server, json_resp(resp)));
+		).map(resp => xena_dataset_list_transform(server, json_resp(resp))).catch(Rx.Observable.return([]));
 	}
 
 	function code_list(host, ds, probes) {

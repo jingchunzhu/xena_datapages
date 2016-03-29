@@ -7,10 +7,10 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 	function (dom_helper, xenaQuery, session,  _,  Rx, xenaAdmin, lunr) {
 	'use strict';
 
-  var React = require('react');
-  var ReactDOM = require('react-dom');
-  var Modal = require('react-bootstrap/lib/Modal');
-  var Button = require('react-bootstrap/lib/Button');
+	var React = require('react');
+	var ReactDOM = require('react-dom');
+	var Modal = require('react-bootstrap/lib/Modal');
+	var Button = require('react-bootstrap/lib/Button');
 
 	// check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
 	function checkGenomicDataset(hosts, cohort, goodStatus) {
@@ -83,8 +83,9 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 
 	function cohortHeatmapButton(cohort, hosts, vizbuttonParent) {
 		var vizbutton,
-				goodStatus = session.GOODSTATUS;
-  	ifCohortExistDo(cohort, _.intersection(_.intersection(activeHosts, hosts), userHosts), goodStatus, function(){
+			goodStatus = session.GOODSTATUS;
+
+  		ifCohortExistDo(cohort, _.intersection(_.intersection(activeHosts, hosts), userHosts), goodStatus, function(){
 			vizbutton = document.createElement("BUTTON");
 			vizbutton.setAttribute("class","vizbutton");
 			vizbutton.appendChild(document.createTextNode("Visualize"));
@@ -100,16 +101,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 	function warningPopUp (node, loaderWarning){
 		node.onclick = function(){
 			alert("Load Waring:\n"+JSON.stringify(loaderWarning));
-			/*var root = $('<div>')[0];
-			$(root).dialog({
-				modal: true,
-				title: 'Loader Warning',
-				position: ['center', 100],
-				width:400
-			});
-			root.appendChild(document.createTextNode(JSON.stringify(loaderWarning)));
-			return false;
-			*/
 		};
 	}
 
@@ -171,23 +162,23 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		var img;
 		if (cohortName.search(/^Treehouse/gi) !== -1){
 			img = new Image();
-  	  img.src = treehouseImg;
-  	  img.height = "40";
-    }
-    return img;
+			img.src = treehouseImg;
+			img.height = "40";
+		}
+		return img;
 	}
 
 	function buildInfoImage (tipMessage) {
 		var node = document.createElement("span"),
 			img = new Image();
 
-  	img.src = infoImgSource;
-  	img.height = "20";
-  	node.appendChild(img);
+		img.src = infoImgSource;
+		img.height = "20";
+		node.appendChild(img);
 
 		adhocTooltip (node, img, tipMessage);
 
-    return node;
+		return node;
 	}
 
 	function adhocTooltip (outsideDiv, tooltipDOM, tipMessage ){
@@ -225,7 +216,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		tooltipDOM.addEventListener("mouseover", showTip, false);
 		tooltipDOM.addEventListener("mouseout", hideTip, false);
 	}
-
 
 	function cohortListPage(hosts, rootNode) {
 		if (!hosts || hosts.length <= 0) {
@@ -1085,14 +1075,14 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			sideNode.appendChild(document.createElement("br"));
 		}
 
-    //download selected samples' data
-    /*
-    var mountPoint = document.createElement("div");
-    if (downloadSelecedSampleButton (dataset, mountPoint)){
-      sideNode.appendChild(mountPoint);
-      sideNode.appendChild(document.createElement("br"));
-    }
-    */
+		//download selected samples' data
+		/*
+		var mountPoint = document.createElement("div");
+		if (downloadSelecedSampleButton (dataset, mountPoint)){
+		  sideNode.appendChild(mountPoint);
+		  sideNode.appendChild(document.createElement("br"));
+		}
+		*/
 
 		// delete button
 		button = deleteDataButton (dataset);
