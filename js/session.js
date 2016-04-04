@@ -15,7 +15,7 @@ define(["./xenaQuery", "rx", "./dom_helper", "./underscore_ext", "./controller"]
 		defaultHosts,
 		GOODSTATUS = "loaded";
 
-	defaultNames[defaultLocal] = "Your computer hub";
+	defaultNames[defaultLocal] = "My computer hub";
 	defaultNames[defaultUCSC] = "UCSC public main hub (release Nov 2015)";
 	defaultNames[defaultTCGA] = "TCGA hub";
 	defaultNames[defaultICGC] = "ICGC hub";
