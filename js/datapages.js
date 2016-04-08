@@ -1,4 +1,3 @@
-/*jslint browser:true, nomen: true */
 /*global define: false, confirm: true */
 /*global require: false, module: false */
 
@@ -11,6 +10,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 	var ReactDOM = require('react-dom');
 	var Modal = require('react-bootstrap/lib/Modal');
 	var Button = require('react-bootstrap/lib/Button');
+	var showdown  = require('showdown');  /* https://github.com/showdownjs/showdown */
 
 	// check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
 	function checkGenomicDataset(hosts, cohort, goodStatus) {
@@ -280,13 +280,9 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		}
 		vizbuttonParent.appendChild(document.createTextNode(cohortName));
 		cohortHeatmapButton(cohortName, _.intersection(activeHosts, userHosts), vizbuttonParent);
-		node.appendChild(document.createElement("br"));
+		//node.appendChild(document.createElement("br"));
 
 		ifCohortExistDo (cohortName, hosts, undefined, function() {
-			// samples: N
-			//node.appendChild(dom_helper.labelValueNode("samples:", cohortName + "sampleN"));
-			//updateDOM_xenaCohort_sampleN(cohortName + "sampleN", hosts, cohortName);
-
 			//dataset list
 			xenaQuery.dataset_list(hosts, cohortName).subscribe(
 				function (s) {
@@ -341,15 +337,16 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 					var nodeDataType = dom_helper.sectionNode("dataType");
 
 					var keys = Object.keys(dataType).sort(),
-							displayType,
-							listNode;
+						displayType,
+						listNode;
+
 					keys.forEach(function (type) {
 						displayType = type;
 						if (type === "undefined") {
 							displayType = "others";
 						}
 						nodeDataType.appendChild(dom_helper.elt("header", displayType));
-						listNode = dom_helper.elt("ul");
+						listNode = dom_helper.elt("div");
 
 						dataType[type].map(function(fullname){
 							return [ dataLabel[fullname],fullname];
@@ -409,31 +406,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 					});
 
 					rootNode.appendChild(nodeDataType);
-
-					// samples section
-					/*var sampleNode = dom_helper.sectionNode("dataType");
-					rootNode.appendChild(sampleNode);
-
-					var source = Rx.Observable.zipArray(
-						hosts.map(function (host) {
-							return xenaQuery.all_samples(host,cohortName);
-						})
-					);
-
-					source.subscribe(function(x){
-						var samples = _.uniq(_.flatten(x));
-
-						sampleNode.appendChild(dom_helper.elt("header", samples.length.toLocaleString() + " samples"));
-						listNode = dom_helper.elt("ul");
-							sampleNode.appendChild(listNode);
-							sampleNode.appendChild(dom_helper.elt("br"));
-
-							samples.forEach(function (sample) {
-								listNode.appendChild(dom_helper.elt(
-									"li", dom_helper.hrefLink(sample, "?sample=" + sample + "&cohort=" + cohortName)));
-							});
-					});
-					*/
 			});
 		});
 	}
@@ -572,7 +544,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		}
 
 		// host: host
-		sectionNode.appendChild(dom_helper.elt("labelsameLength","host"));
+		sectionNode.appendChild(dom_helper.elt("labelsameLength","hub"));
 		hostNode = dom_helper.elt("resultsameLength",
 			dom_helper.hrefLink(session.getHubName(host), "?host=" + host));
 		hostNode.setAttribute("id", "status" + host);
@@ -692,12 +664,14 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			spaceHolderNode.appendChild(document.createTextNode(" x "));
 			// samples: n
 			spaceHolderNode.appendChild(node);
+			spaceHolderNode.appendChild(dom_helper.elt("span"," "));
 		} else if (type === "clinicalMatrix") {
 			// samples: n
 			spaceHolderNode.appendChild(node);
 			spaceHolderNode.appendChild(document.createTextNode(" x "));
 			//identifiers count
 			spaceHolderNode.appendChild(node2);
+			spaceHolderNode.appendChild(dom_helper.elt("span"," "));
 		} else if (type === "mutationVector") {
 			node = undefined;
 			node2= undefined;
@@ -705,11 +679,11 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 
 		xenaQuery.dataset_samples(host, name).subscribe(function (s) {
 			if (node){
-				node.innerHTML= s.length.toLocaleString()+" samples";
+				node.innerHTML= s.length.toLocaleString()+" samples ";
 			}
 			xenaQuery.dataset_field(host, name).subscribe(function(probes){
 				if (node2) {
-					node2.innerHTML = probes.length.toLocaleString() +" identifiers";
+					node2.innerHTML = probes.length.toLocaleString() +" identifiers ";
 				}
 				sectionNode.replaceChild(spaceHolderNode, oldNode);
 
@@ -1030,7 +1004,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		var checkNode = dom_helper.sectionNode("sidehub");
 
 		checkNode.appendChild(dom_helper.elt("h3", dom_helper.hrefLink("Active Data Hubs", "../hub/")));
-		checkNode.appendChild(dom_helper.elt("br"));
+		checkNode.appendChild(dom_helper.elt("h3"));
 
 		hosts.forEach(function (host) {
 			session.updateHostStatus(host);
@@ -1041,7 +1015,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			tmpNode.setAttribute("id", "sidebar" + host);
 			checkbox.setAttribute("id", "sidebarCheck" + host);
 			checkNode.appendChild(dom_helper.elt("h4", checkbox, " ", tmpNode));
-			checkNode.appendChild(dom_helper.elt("br"));
+			checkNode.appendChild(dom_helper.elt("h4"));
 		});
 		sideNode.appendChild(checkNode);
 
@@ -1413,12 +1387,30 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		baseNode.appendChild(container);
 	}
 
+	//testing your markdowns http://showdownjs.github.io/demo/
+	function renderMarkDownFile(file, node)
+	{
+	    Rx.DOM.get(file).subscribe(function(resp){
+	    	var converter = new showdown.Converter();
+			node.innerHTML = converter.makeHtml(resp.responseText);
+			node.appendChild(document.createElement("br"));
+	    });
+	}
+
 	function hostPage (baseNode,host){
-		// host title
-		var node=dom_helper.sectionNode("cohort"),
+		//hub markdown
+		var mdFile = host+"/download/meta/info.mdown",
+			markdownNode = document.createElement("div");
+		markdownNode.setAttribute("class","hubinfo");
+		baseNode.appendChild(markdownNode);
+		renderMarkDownFile(mdFile, markdownNode);
+
+		// hub basic info
+		var node = document.createElement("div"),
 			hostLabel = session.getHubName(host),
 			tmpNode = dom_helper.hrefLink(hostLabel + " (connecting)", "../datapages/?host=" + host);
 
+		node.setAttribute("class","hubinfo");
 		tmpNode.setAttribute("id", "status" + host);
 		node.appendChild(dom_helper.elt("h2", tmpNode));
 		node.appendChild(document.createTextNode("Hub Address: " +host));
@@ -1426,7 +1418,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 
 		// cohort list
 		cohortListPage([host], node);
-
 		baseNode.appendChild(node);
 	}
 
