@@ -208,12 +208,14 @@ margin-top: 5px;
 margin-bottom: 5px;
 }
 
-#main .vizbutton
+.vizbutton
 {
 padding: 3px 6px;
 font-size:small;
 margin: 5px 10px;
 vertical-align: 5%;
+border: 1px solid #AFAFAF;
+background: linear-gradient(#ddd, #f5f5f5);
 }
 
 .vizbutton:hover {

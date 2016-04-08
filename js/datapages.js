@@ -71,7 +71,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			deletebutton.setAttribute("class","vizbutton");
 		  deletebutton.appendChild(document.createTextNode("Remove"));
 			deletebutton.addEventListener("click", function() {
-				var r = confirm("Delete \""+name + "\" from your local xena.");
+				var r = confirm("Delete \""+name + "\" from my computer hub.");
 				if (r === true) {
 					xenaAdmin.delete(localHost, name).subscribe();
 				  location.reload(); // reload current page
@@ -97,6 +97,15 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		});
 	}
 
+	function configHubButton () {
+		var button = document.createElement("BUTTON");
+		button.setAttribute("class","vizbutton");
+		button.appendChild(document.createTextNode("Configure my data hubs"));
+		button.addEventListener("click", function() {
+			location.href = "../hub/";
+		 });
+		return button;
+	}
 
 	function warningPopUp (node, loaderWarning){
 		node.onclick = function(){
@@ -1226,8 +1235,8 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 	function frontPage (baseNode){
 		var indxObj={},
 			inputBox = document.createElement("INPUT"),
-		  searchButton = document.createElement("BUTTON"),
-		  resetButton = document.createElement("BUTTON");
+		  	searchButton = document.createElement("BUTTON"),
+		  	resetButton = document.createElement("BUTTON");
 
 		function searchUI(sectionNode){
 			var query;
@@ -1405,14 +1414,15 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		baseNode.appendChild(markdownNode);
 		renderMarkDownFile(mdFile, markdownNode);
 
-		// hub basic info
+		// hub basic info and hub configuration button
 		var node = document.createElement("div"),
 			hostLabel = session.getHubName(host),
 			tmpNode = dom_helper.hrefLink(hostLabel + " (connecting)", "../datapages/?host=" + host);
 
 		node.setAttribute("class","hubinfo");
 		tmpNode.setAttribute("id", "status" + host);
-		node.appendChild(dom_helper.elt("h2", tmpNode));
+		node.appendChild(dom_helper.elt("h2", tmpNode, configHubButton() ));
+
 		node.appendChild(document.createTextNode("Hub Address: " +host));
 		session.updateHostStatus(host);
 
