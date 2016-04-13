@@ -249,7 +249,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 					}
 				});
 
-			rootNode.appendChild(dom_helper.elt("h2", cohortC.length+" Cohorts"));
+			rootNode.appendChild(dom_helper.elt("h2", cohortC.filter(cohortName => cohortName!==COHORT_NULL).length+" Cohorts"));
 			rootNode.appendChild(node);
 
 			cohortC.sort(function (a,b){
