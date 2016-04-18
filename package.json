@@ -49,7 +49,6 @@
     "mocha-loader": "^0.7.1",
     "rimraf": "^2.3.2",
     "semver": "^5.0.3",
-    "showdown": "1.3.0",
     "style-loader": "^0.8.3",
     "url-loader": "^0.5.5",
     "webpack": "^1.5.3",
@@ -62,10 +61,12 @@
     "react-dom": "^0.14.7",
     "rx": "^2.4.3",
     "rx-dom": "^4.0.4",
-    "babel-runtime": "^5.1.13"
+    "babel-runtime": "^5.1.13",
+    "ehmutable": "^1.1.0"
   },
   "dependencies": {
-    "lunr": "0.5.7"
+    "lunr": "0.5.7",
+    "showdown": "1.3.0"
   },
   "directories": {
     "doc": "docs",

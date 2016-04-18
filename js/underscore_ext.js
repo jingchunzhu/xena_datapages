@@ -1,5 +1,5 @@
 /*globals define: false */
-define(['underscore', './immutable'], function(_, immutable) {
+define(['underscore', 'ehmutable'], function(_, immutable) {
 	'use strict';
 
 	// Concat array with following arguments
