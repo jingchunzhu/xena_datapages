@@ -90,8 +90,8 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			vizbutton.setAttribute("class","vizbutton");
 			vizbutton.appendChild(document.createTextNode("Visualize"));
 			vizbutton.addEventListener("click", function() {
-  			session.xenaHeatmapSetCohort(cohort);
-  			location.href = "../heatmap/"; //goto heatmap page
+  				session.xenaHeatmapSetCohort(cohort);
+  				location.href = "../heatmap/"; //goto heatmap page
 			});
 			vizbuttonParent.appendChild(vizbutton);
 		});
@@ -345,11 +345,14 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 					// dataType section
 					var nodeDataType = dom_helper.sectionNode("dataType");
 
-					var keys = Object.keys(dataType).sort(),
+					var dataTypes = _.keys(dataType).sort(),
 						displayType,
 						listNode;
 
-					keys.forEach(function (type) {
+					dataTypes.map(function (type) {
+						if (type === "filter" || type ==="Filter"){
+							return;
+						}
 						displayType = type;
 						if (type === "undefined") {
 							displayType = "others";
@@ -727,7 +730,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			rootNode = dom_helper.sectionNode("bigDataSnippet");
 
 		document.body.appendChild(rootNode);
-		rootNode.appendChild(dom_helper.elt("h3","dataset: "+label));
+		rootNode.appendChild(dom_helper.elt("h3","dataset: "+label, backtoDatasetButton(host, dataset)));
 		textNode = document.createElement("pre");
 		rootNode.appendChild(textNode);
 
@@ -745,7 +748,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			rootNode = dom_helper.sectionNode("bigDataSnippet");
 
 		document.body.appendChild(rootNode);
-		rootNode.appendChild(dom_helper.elt("h3","dataset: "+label));
+		rootNode.appendChild(dom_helper.elt("h3","dataset: "+label, backtoDatasetButton(host, dataset)));
 		textNode = document.createElement("pre");
 		rootNode.appendChild(textNode);
 
@@ -1090,11 +1093,21 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		return host+"/download/"+name+".json";
 	}
 
+	function backtoDatasetButton (host, dataset){
+		var button = document.createElement("BUTTON");
+		button.setAttribute("class","vizbutton");
+		button.appendChild(document.createTextNode("Back to dataset"));
+		button.addEventListener("click", function() {
+			location.href = "?dataset="+encodeURIComponent(dataset)+"&host="+encodeURIComponent(host);
+		 });
+		return button;
+	}
+
 	function downloadDataButton (dataset){
 		if(dataset.status === session.GOODSTATUS) {
 			var button = document.createElement("BUTTON");
 			button.setAttribute("class","vizbutton");
-		  button.appendChild(document.createTextNode("Download"));
+			button.appendChild(document.createTextNode("Download"));
 			button.addEventListener("click", function() {
 				location.href = downloadLink(dataset);
 		  });
@@ -1157,7 +1170,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		document.title= dataset;
 		document.body.appendChild(rootNode);
 		rootNode.appendChild(node);
-		node.appendChild( dom_helper.elt("h3","dataset: "+dataset));
+		node.appendChild( dom_helper.elt("h3","dataset: "+dataset, backtoDatasetButton(host, dataset)));
 		node.appendChild( blockNode );
 		blockNode.style.color="red";
 

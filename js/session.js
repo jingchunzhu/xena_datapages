@@ -5,36 +5,38 @@ define(["./xenaQuery", "rx", "./dom_helper", "./underscore_ext", "./controller"]
 	'use strict';
 
 	var defaultLocal = "https://local.xena.ucsc.edu:7223",
-		defaultUCSC = "https://genome-cancer.ucsc.edu:443/proj/public/xena",
+		//defaultUCSC = "https://genome-cancer.ucsc.edu:443/proj/public/xena",
+		defaultUCSC = "https://ucscpublic.xenahubs.net",
 		defaultTCGA = "https://tcga.xenahubs.net",
 		defaultICGC = "https://icgc.xenahubs.net",
 		defaultTOIL = "https://toil.xenahubs.net",
-		defaultTreehouse = "http://ec2-52-8-94-52.us-west-1.compute.amazonaws.com:7222",
+		defaultPCAWG = "https://pcawg.xenahubs.net",
 		defaultNames = {},
 		defaultAllHubs,
 		defaultHosts,
 		GOODSTATUS = "loaded";
 
 	defaultNames[defaultLocal] = "My computer hub";
-	defaultNames[defaultUCSC] = "UCSC public main hub (release Nov 2015)";
+	defaultNames[defaultUCSC] = "UCSC public hub";
 	defaultNames[defaultTCGA] = "TCGA hub";
 	defaultNames[defaultICGC] = "ICGC hub";
 	defaultNames[defaultTOIL] = "TOIL hub";
-	defaultNames[defaultTreehouse] = "Treehouse hub";
+	defaultNames[defaultPCAWG] = "PCAWG public hub";
 
 	defaultAllHubs = [
-    defaultLocal,
+    	defaultLocal,
 		defaultUCSC,
 		defaultTCGA,
 		defaultICGC,
 		defaultTOIL,
-		//defaultTreehouse,
 	];
 
 	defaultHosts = [
 		defaultLocal,
-    defaultUCSC,
-    defaultTOIL,
+		defaultTCGA,
+	    defaultUCSC,
+	    defaultICGC,
+    	defaultTOIL,
 	];
 
 	var xenaStateResets = {
