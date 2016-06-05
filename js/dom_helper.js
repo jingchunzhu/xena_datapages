@@ -1,9 +1,7 @@
-/*jslint browser:true, nomen: true*/
 /*global define: false */
+'use strict';
 
 define(["underscore"], function (_) {
-	'use strict';
-
 	//create a ELEMENT_NODE with a tag, and all following argument as a child to this node
 	function elt(tag) {
 		var node = document.createElement(tag);

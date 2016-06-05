@@ -151,7 +151,7 @@ define(["./xenaQuery", "rx", "./dom_helper", "./underscore_ext", "./controller"]
 					addHostToListInSession('metadataFilterHosts', host);
 				} else { // remove host
 					removeHostFromListInSession('userHosts', host);
-					//removeHostFromListInSession('metadataFilterHosts', host);
+					removeHostFromListInSession('metadataFilterHosts', host);
 
 					//check if host that will be removed has the "cohort" in the xena heatmap state setting ///////////TODO
 // XXX This seems wrong. If the cohort is on multiple hosts, it still resets the heatmap.

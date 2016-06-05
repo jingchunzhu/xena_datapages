@@ -1,15 +1,12 @@
 /*global define: false, confirm: true */
 /*global require: false, module: false */
 
+'use strict';
+
 define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaAdmin",
 	'lunr',  "rx-dom", "../css/datapages.css"],
 	function (dom_helper, xenaQuery, session,  _,  Rx, xenaAdmin, lunr) {
-	'use strict';
 
-	var React = require('react');
-	var ReactDOM = require('react-dom');
-	var Modal = require('react-bootstrap/lib/Modal');
-	var Button = require('react-bootstrap/lib/Button');
 	var showdown  = require('showdown');  /* https://github.com/showdownjs/showdown */
 
 	// check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
@@ -119,8 +116,7 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			img,
 			link = "?cohort=" + encodeURIComponent(cohortName),
 			nodeTitle = dom_helper.hrefLink(cohortName, link),
-			tmpNode,
-			d1,d2,dGap;
+			tmpNode;
 
 		//info image
 		tmpNode = document.createElement("a");
@@ -150,12 +146,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		// new status
 		tmpNode = document.createElement("span");
 		liNode.appendChild(tmpNode);
-
-		xenaQuery.dataset_list(hosts, cohortName).subscribe( function (s) {
-			var datasetsList= _.flatten(s.map(function(obj){
-				return _.values(_.pick(obj,'datasets'));
-			}));
-		});
 
 		node.appendChild(liNode);
 
@@ -877,9 +867,9 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 						xenaQuery.code_list(host, name, probes).subscribe(function(codemap){
 							//return probes by all_samples
 							var row, column,
-									dataRow, dataCol,
-									i,j,text,
-									firstRow, firstCol;
+								dataRow, dataCol,
+								i,j,
+								firstRow, firstCol;
 
 							xenaQuery.dataset_probe_values(host, name, samples, probes).subscribe( function (s) {
 								if (type==="genomicMatrix"){
@@ -1061,15 +1051,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			sideNode.appendChild(document.createElement("br"));
 		}
 
-		//download selected samples' data
-		/*
-		var mountPoint = document.createElement("div");
-		if (downloadSelecedSampleButton (dataset, mountPoint)){
-		  sideNode.appendChild(mountPoint);
-		  sideNode.appendChild(document.createElement("br"));
-		}
-		*/
-
 		// delete button
 		button = deleteDataButton (dataset);
 		if (button) {
@@ -1114,53 +1095,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		  return button;
 		}
 	}
-
-	function downloadSelecedSampleButton (dataset, mountPoint){
-		if(dataset.status !== session.GOODSTATUS) {
-      return false;
-    }
-
-    const Example = React.createClass({
-
-      getInitialState() {
-        return { showModal: false };
-      },
-
-      close() {
-        this.setState({ showModal: false });
-      },
-
-      open() {
-        this.setState({ showModal: true });
-      },
-
-      render() {
-        return (
-          <div>
-            <Button type= "submit" className="vizbutton" onClick={this.open}>
-              Download subset
-            </Button>
-
-            <Modal show={this.state.showModal} onHide={this.close}>
-              <Modal.Header closeButton>
-                <Modal.Title>Download data from a subset of samples</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <p>Enter a list of samples separated by comma</p>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button type = "submit" bsStyle="primary">Submit</Button>
-                <Button onClick={this.close}>Close</Button>
-              </Modal.Footer>
-            </Modal>
-          </div>
-        );
-      }
-    });
-
-    ReactDOM.render(< Example />, mountPoint);
-    return true;
-  }
 
 	function bigDataSnippetPage (host, dataset, nSamples, nProbes){
 		var blockNode = dom_helper.elt("span", "If you are reading this, you need release browser SHIELD to see the data requested"),
@@ -1279,14 +1213,13 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 		}
 
 		function doSearch(query) {
-			var type, name, cohort, url,
+			var cohort, url,
 				cohortList=[], datasetList=[],
 				idx, store,
-				tiimer;
+				timer;
 
 			function displaySearchResult(){
-				var tmpDatasetNode, tmpSampleNode,
-					results,
+				var results,
 					array;
 
 				results= idx.search(query);
@@ -1369,14 +1302,14 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 				buildIndex (indxObj, _.intersection(activeHosts, metadataFilterHosts));
 			}
 
-			tiimer = setInterval(function(){
+			timer = setInterval(function(){
 				if (!indxObj.index){
 					return;
 				}
 				store = indxObj.store;
 				idx = indxObj.index;
 				displaySearchResult();
-				clearInterval(tiimer);
+				clearInterval(timer);
 			}, 50);
 		}
 
@@ -1449,21 +1382,6 @@ define(["./dom_helper", "./xenaQuery", "./session", "underscore", "rx", "./xenaA
 			var tag = "result";
 			var node = document.getElementById(DOM_id);
 			node.parentNode.replaceChild(dom_helper.elt(tag, (s.length.toLocaleString())), node);
-		});
-	}
-
-
-	function updateDOM_xenaCohort_sampleN(DOM_id, hosts, cohort) {
-		var source = Rx.Observable.zipArray(
-			hosts.map(function (host) {
-				return xenaQuery.all_samples(host,cohort);
-			})
-		);
-
-		source.subscribe(function(x){
-			var node = document.getElementById(DOM_id),
-				sampleN= _.uniq(_.flatten(x)).length;
-			node.appendChild(dom_helper.elt("result", " " + sampleN.toLocaleString()));
 		});
 	}
 

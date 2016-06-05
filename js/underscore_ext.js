@@ -1,6 +1,7 @@
 /*globals define: false */
+
+'use strict';
 define(['underscore', 'ehmutable'], function(_, immutable) {
-	'use strict';
 
 	// Concat array with following arguments
 	/* Like _.find, but return the result of the predicate */

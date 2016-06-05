@@ -1,7 +1,8 @@
 /*global define: false */
 
+'use strict';
 define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
-	'use strict';
+
 
 	// HELPERS
 

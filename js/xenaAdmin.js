@@ -1,8 +1,6 @@
 /*global define: false */
-
+'use strict';
 define(['rx-dom', './underscore_ext'], function (Rx, _) {
-    'use strict';
-
 	function expandArrays(v, k) {
 		if (_.isArray(v)) {
 			return _.zip(v, _.times(v.length, _.constant(k)));
