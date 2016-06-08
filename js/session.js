@@ -20,11 +20,11 @@ define(["./xenaQuery", "rx", "./dom_helper", "./underscore_ext", "./controller"]
 	defaultNames[defaultUCSC] = "UCSC public hub";
 	defaultNames[defaultTCGA] = "TCGA hub";
 	defaultNames[defaultICGC] = "ICGC hub";
-	defaultNames[defaultTOIL] = "TOIL hub";
+	defaultNames[defaultTOIL] = "GA4GH-BD2K (TOIL) hub";
 	defaultNames[defaultPCAWG] = "PCAWG public hub";
 
 	defaultAllHubs = [
-    	defaultLocal,
+		defaultLocal,
 		defaultUCSC,
 		defaultTCGA,
 		defaultICGC,
@@ -34,9 +34,9 @@ define(["./xenaQuery", "rx", "./dom_helper", "./underscore_ext", "./controller"]
 	defaultHosts = [
 		defaultLocal,
 		defaultTCGA,
-	    defaultUCSC,
-	    defaultICGC,
-    	defaultTOIL,
+		defaultUCSC,
+		defaultICGC,
+		defaultTOIL,
 	];
 
 	var xenaStateResets = {
