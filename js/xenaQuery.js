@@ -1,3 +1,4 @@
+/*eslint camelcase: 0, no-multi-spaces: 0, no-mixed-spaces-and-tabs: 0 */
 /*global define: false */
 
 'use strict';
@@ -62,7 +63,7 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 			host = tokens[2],
 			defproto = 'https://',
 			proto = tokens[1] || defproto,
-      defport = (proto===defproto) ? '443' :'7222',
+      defport = (proto === defproto) ? '443' : '7222',
       port = tokens[4] || defport,
       path = tokens[5] || '',
       url;
@@ -84,8 +85,8 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 	// new optional id parameter is for differentiate the same req with some sort of user-supplied identification
 	function reqObj(req, fn, id) { // TODO may not belong in this file
 		return {
-			id: JSON.stringify(req)+id,
-			query:  Rx.Observable.defer(_.partial(fn, req))
+			id: JSON.stringify(req) + id,
+			query: Rx.Observable.defer(_.partial(fn, req))
 		};
 	}
 

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "webpack-dev-server --config webpack.test.js --port 8081",
-    "lint": "eslint --no-color js/*.js test/*.js",
+    "lint": "eslint --no-color js/*.js js/*/*.js test/*.js",
+    "eslint": "eslint",
     "clean": "rimraf build/* dist/*",
     "start": "webpack-dev-server --devtool eval --progress --colors --history-api-fallback --port 8080",
     "build": "webpack",
