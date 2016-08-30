@@ -1,23 +1,32 @@
 /*global require: false, module: false */
 'use strict';
 var _ = require('./underscore_ext');
+var {defaultState} = require('./defaults');
+var {updateHostStatus} = require('./session');
+
+// After settings change, update the list of hosts that
+// are in use for the session. It's confusing that 'hubs'
+// tracks 'servers.userHosts', while viz tracks 'server.user'.
+var setUserServers = state => {
+	let {activeHosts, userHosts} = state.servers;
+	return _.assocIn(state, ['servers', 'user'],
+			_.intersection(activeHosts, userHosts));
+};
+
+function updateAllHosts(state) {
+	state.allHosts.forEach(function(host) {
+		updateHostStatus(host); // only currently update sessinostorage, not state ( :( )
+	});
+}
 
 var controls = {
-	servers: (state, servers) => _.assocIn(state, ['servers', 'user'], servers),
-	// XXX The list of things to be zeroed when cohort changes must be kept in
-	// sync with the heatmap code. Might be better to put it under a key so it
-	// can be opaque in this instance.
-	cohort: (state, cohort) => state.cohort === cohort ? state :
-		_.assoc(state,
-			   'cohort', cohort,
-			   'samplesFrom', null,
-			   'samples', null,
-			   'columns', {},
-			   'columnOrder', [],
-			   'data', {},
-			   'survival', null,
-			   'datasets', null,
-			   'km', null)
+	init: state => _.updateIn(state, ['servers'], s => _.merge(defaultState, s)),
+	'init-post!': (serverBus, state, newState) => updateAllHosts(newState),
+	'add-host': (state, list, host) =>
+		setUserServers(_.updateIn(state, ['servers', list], l => _.union(l, [host]))),
+	'remove-host': (state, list, host) =>
+		setUserServers(_.updateIn(state, ['servers', list], l => _.difference(l, [host]))),
+	 cohort: (state, cohort) => _.assoc(state, 'cohortPending', [{name: cohort}])
 };
 
 var identity = x => x;

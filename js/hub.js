@@ -52,9 +52,14 @@ function addHost() {
 	session.updateHostStatus(host);
 }
 
-module.exports = function (main) {
-	session.sessionStorageInitialize();
-	hosts = JSON.parse(sessionStorage.state).allHosts;
+var initialized = false;
+module.exports = function (main, state) {
+	session.setState(state);
+	if (initialized) {
+		return;
+	}
+	initialized = true;
+	hosts = state.allHosts;
 	var node = domHelper.sectionNode("hub"),
 		newText, addbutton;
 

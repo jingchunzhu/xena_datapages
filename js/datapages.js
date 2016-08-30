@@ -14,16 +14,9 @@ var lunr = require("lunr");
 require("rx-dom");
 require("../css/datapages.css");
 
-var showdown  = require('showdown');  /* https://github.com/showdownjs/showdown */
+var showdown = require('showdown');  /* https://github.com/showdownjs/showdown */
 
-session.sessionStorageInitialize();
-
-var state = JSON.parse(sessionStorage.state),
-	allHosts = state.allHosts, // all hosts
-	activeHosts = state.activeHosts, // activetHosts
-	userHosts = state.userHosts, // selectedtHosts
-	localHost = state.localHost, //localhost
-	metadataFilterHosts = state.metadataFilterHosts; // metadataFilter
+var allHosts, activeHosts, userHosts, localHost, metadataFilterHosts;
 
 var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if there is a query string
 	COHORT_NULL = '(unassigned)',
@@ -1383,7 +1376,20 @@ function hostPage (baseNode, host) {
 	baseNode.appendChild(node);
 }
 
-function start(baseNode) {
+var initialized = false;
+module.exports = (baseNode, state) => {
+	session.setState(state);
+
+	allHosts = state.allHosts; // all hosts
+	activeHosts = state.activeHosts; // activetHosts
+	userHosts = state.userHosts; // selectedtHosts
+	localHost = state.localHost; //localhost
+	metadataFilterHosts = state.metadataFilterHosts; // metadataFilter
+
+	if (initialized) {
+		return;
+	}
+	initialized = true;
 	var container, sideNode, mainNode,
 		keys = Object.keys(queryString),
 		host = queryString.host,
@@ -1477,8 +1483,4 @@ function start(baseNode) {
 	else {
 		frontPage(baseNode);
 	}
-}
-
-module.exports = {
-	start
 };

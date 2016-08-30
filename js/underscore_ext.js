@@ -17,6 +17,7 @@ define(['underscore', 'ehmutable'], function(_, immutable) {
 	_.mixin({
 		findValue: findValue,
 		flatmap: _.compose(_.partial(_.flatten, _, 1), _.map),
+		merge: (...args) => _.extend.apply(null, [{}].concat(args)),
 		...immutable
 	});
 

@@ -6,16 +6,10 @@ var _ = require("./underscore_ext");
 var controller = require("./controller");
 
 
-var defaultLocal = "https://local.xena.ucsc.edu:7223",
-	//defaultUCSC = "https://genome-cancer.ucsc.edu:443/proj/public/xena",
-	defaultUCSC = "https://ucscpublic.xenahubs.net",
-	defaultTCGA = "https://tcga.xenahubs.net",
-	defaultICGC = "https://icgc.xenahubs.net",
-	defaultTOIL = "https://toil.xenahubs.net",
-	defaultPCAWG = "https://pcawg.xenahubs.net",
-	defaultNames = {},
-	defaultAllHubs,
-	defaultHosts,
+var {defaultLocal, defaultUCSC, defaultTCGA, defaultICGC, defaultTOIL,
+	defaultPCAWG} = require('./defaults');
+
+var defaultNames = {},
 	GOODSTATUS = "loaded";
 
 defaultNames[defaultLocal] = "My computer hub";
@@ -25,34 +19,11 @@ defaultNames[defaultICGC] = "ICGC hub";
 defaultNames[defaultTOIL] = "GA4GH-BD2K (TOIL) hub";
 defaultNames[defaultPCAWG] = "PCAWG public hub";
 
-defaultAllHubs = [
-	defaultLocal,
-	defaultUCSC,
-	defaultTCGA,
-	defaultICGC,
-	defaultTOIL,
-];
-
-defaultHosts = [
-	defaultLocal,
-	defaultTCGA,
-	defaultUCSC,
-	defaultICGC,
-	defaultTOIL,
-];
-
-var xenaStateResets = {
-		mode: 'heatmap',
-		zoom: {height: 300},
-		columns: {},
-		columnOrder: [],
-		samples: []
-	};
-var xenaStateInit = {...xenaStateResets, servers: {user: []}};
+var xenaState;
 
 function sessionStorageCallback(ev) {
-	var state = sessionStorage.xena ? JSON.parse(sessionStorage.xena) : xenaStateInit;
-	sessionStorage.xena = JSON.stringify(controller.action(state, ev));
+	throw new Error('sessionStorageCallback is broken');
+	xenaState = controller.action(xenaState, ev);
 }
 
 var callback = sessionStorageCallback;
@@ -61,22 +32,8 @@ function xenaHeatmapSetCohort(cohortname) {
 	callback(['cohort', cohortname]);
 }
 
-//set xena user server
-function setXenaUserServer() {
-	let {activeHosts, userHosts} = JSON.parse(sessionStorage.state),
-		servers = _.intersection(activeHosts, userHosts);
-	callback(['servers', servers]);
-}
-
-function getSessionStorageState () {
-	return sessionStorage.state ? JSON.parse(sessionStorage.state) : {};
-}
-
 function addHostToListInSession(list, host) {
-	var state = JSON.parse(sessionStorage.state);
-	state[list] = _.union(state[list], [host]);
-	sessionStorage.state = JSON.stringify(state);
-	setXenaUserServer();
+	callback(['add-host', list, host]);
 }
 
 function updateHostDOM(host, status) {
@@ -138,17 +95,14 @@ function updateHostDOM(host, status) {
 }
 
 function removeHostFromListInSession(list, host) {
-	var state = JSON.parse(sessionStorage.state);
-	state[list] = _.difference(state[list], [host]);
-	sessionStorage.state = JSON.stringify(state);
-	setXenaUserServer();
+	callback(['remove-host', list, host]);
 }
 
 function updateHostStatus(host) {
-	var userHosts = JSON.parse(sessionStorage.state).userHosts;
 	addHostToListInSession('allHosts', host);
 
 	xenaQuery.test_host(host).subscribe(function (s) {
+		var userHosts = xenaState.userHosts;
 		if (s) {
 			// test if host can return useful data
 			var start = Date.now();
@@ -170,26 +124,6 @@ function updateHostStatus(host) {
 	});
 }
 
-function sessionStorageInitialize() {
-	var defaultState = {
-			activeHosts: defaultHosts,
-			allHosts: defaultAllHubs,
-			userHosts: defaultHosts,
-			localHost: defaultLocal,
-			metadataFilterHosts: defaultHosts
-		},
-		state = getSessionStorageState();
-
-	state = _.extend(defaultState, state);
-	sessionStorage.state = JSON.stringify(state);
-
-	state.allHosts.forEach(function(host) {
-		updateHostStatus(host); // only currently update sessinostorage, not state ( :( )
-	});
-
-	setXenaUserServer();
-}
-
 function getHubName(host) {
 	if (defaultNames[host]) {
 		return defaultNames[host];
@@ -200,7 +134,7 @@ function getHubName(host) {
 }
 
 function hostCheckBox(host) {
-	var userHosts = JSON.parse(sessionStorage.state).userHosts,
+	var userHosts = xenaState.userHosts,
 		node = domHelper.elt("div"),
 		checkbox = document.createElement("INPUT"),
 		labelText = domHelper.elt('label');
@@ -228,10 +162,9 @@ function hostCheckBox(host) {
 	node.appendChild(labelText);
 
 	checkbox.addEventListener('click', function () {
-		var checked = checkbox.checked,
-			stateJSON = JSON.parse(sessionStorage.state);
+		var checked = checkbox.checked;
 
-		if (checked !== _.contains(stateJSON.userHosts, host)) {
+		if (checked !== _.contains(xenaState.userHosts, host)) {
 			if (checked) { // add host
 				addHostToListInSession('userHosts', host);
 				addHostToListInSession('metadataFilterHosts', host);
@@ -248,7 +181,6 @@ function hostCheckBox(host) {
 //						}
 //					});
 			}
-			setXenaUserServer();
 			checkBoxLabel();
 		}
 	});
@@ -257,7 +189,7 @@ function hostCheckBox(host) {
 }
 
 function metaDataFilterCheckBox(host, ifChangedAction) {
-	var metadataFilterHosts = JSON.parse(sessionStorage.state).metadataFilterHosts,
+	var metadataFilterHosts = xenaState.metadataFilterHosts,
 			checkbox = document.createElement("INPUT");
 
 	checkbox.setAttribute("type", "checkbox");
@@ -265,10 +197,9 @@ function metaDataFilterCheckBox(host, ifChangedAction) {
 	checkbox.checked = _.contains(metadataFilterHosts, host);
 
 	checkbox.addEventListener('click', function () {
-		var checked = checkbox.checked,
-			stateJSON = JSON.parse(sessionStorage.state);
+		var checked = checkbox.checked;
 
-		if (checked !== _.contains(stateJSON.metadataFilterHosts, host)) {
+		if (checked !== _.contains(xenaState.metadataFilterHosts, host)) {
 			if (checked) { // add host
 				addHostToListInSession('metadataFilterHosts', host);
 			} else { // remove host
@@ -284,13 +215,13 @@ function metaDataFilterCheckBox(host, ifChangedAction) {
 }
 
 module.exports = {
-	sessionStorageInitialize: sessionStorageInitialize,
 	updateHostStatus: updateHostStatus,
 	hostCheckBox: hostCheckBox,
 	metaDataFilterCheckBox: metaDataFilterCheckBox,
 	xenaHeatmapSetCohort: xenaHeatmapSetCohort,
 	getHubName: getHubName,
 	setCallback: cb => {callback = cb;},
+	setState: state => {xenaState = state;},
 
 	GOODSTATUS: GOODSTATUS
 };
