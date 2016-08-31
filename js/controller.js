@@ -5,11 +5,10 @@ var {defaultState} = require('./defaults');
 var {updateHostStatus} = require('./session');
 
 // After settings change, update the list of hosts that
-// are in use for the session. It's confusing that 'hubs'
-// tracks 'servers.userHosts', while viz tracks 'server.user'.
+// are in use for the session.
 var setUserServers = state => {
 	let {activeHosts, userHosts} = state.servers;
-	return _.assocIn(state, ['servers', 'user'],
+	return _.assocIn(state, ['servers', 'pending'],
 			_.intersection(activeHosts, userHosts));
 };
 
