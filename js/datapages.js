@@ -21,11 +21,12 @@ var allHosts, activeHosts, userHosts, localHost, metadataFilterHosts;
 var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if there is a query string
 	COHORT_NULL = '(unassigned)',
 	TYPE_NULL = 'genomicMatrix',
-	NOT_GENOMICS = ["sampleMap", "probeMap", "genePred", "genePredExt", "genomicSegment"],
+	NOT_GENOMICS = ["sampleMap", "probeMap", "genePred", "genePredExt"],
 	FORMAT_MAPPING = {
-		'clinicalMatrix': "ROWs (samples)  x  COLUMNs (identifiers)",
-		'genomicMatrix': "ROWs (identifiers)  x  COLUMNs (samples)",
-		'mutationVector': "Mutation by Position",
+		'clinicalMatrix': "ROWs (samples)  x  COLUMNs (identifiers) (i.e. clinicalMatrix)",
+		'genomicMatrix': "ROWs (identifiers)  x  COLUMNs (samples) (i.e. genomicMatrix)",
+		'mutationVector': "Variant by Position (i.e. mutationVector)",
+		'genomicSegment': 'Genomic Segment (i.e. genomicSegment)',
 		'unknown': "unknown"
 	},
 	treehouseImg = require('../images/Treehouse.jpg'),
@@ -338,20 +339,23 @@ function cohortPage(cohortName, hosts, rootNode) {
 					listNode;
 
 				dataTypes.map(function (type) {
-					if (type === "filter" || type === "Filter") {
-						return;
-					}
 					displayType = type;
 					if (type === "undefined") {
 						displayType = "others";
 					}
+
 					nodeDataType.appendChild(domHelper.elt("header", displayType));
 					listNode = domHelper.elt("div");
 
 					_.sortBy(datasetsBySubtype[type], "label").map(function (dataset) {
 						var fullname = dataset.host + dataset.name,
 							link = "?dataset=" + dataset.name + "&host=" + dataset.host,
-							datasetNode = document.createElement("ul");
+							datasetNode = document.createElement("ul"),
+							dataSubType = dataset.dataSubType;
+
+						if ((dataSubType === "filter" || dataSubType === "Filter") && (dataset.host !== localHost)) {
+							return;
+						}
 
 						//info image
 						tmpNode = document.createElement("a");
@@ -509,6 +513,18 @@ function mutationAttrs(list) {
 	});
 }
 
+function segmentAttrs(list) {
+	return _.map(list, function (row) {
+		return {
+			"sampleid": row.sampleID,
+			"chrom": row.position.chrom,
+			"chromstart": row.position.chromstart,
+			"chromend": row.position.chromend,
+			"value": row.value
+		};
+	});
+}
+
 // dup of fn in plotMutationVector.js. Should factor this out.
 function collateRows(rows) {
 	var keys = _.keys(rows);
@@ -614,8 +630,18 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 				});
 			});
 		}
-	else if(type === "mutationVector") {
-		xenaQuery.sparse_data_examples(host, name, nProbes).map(r => mutationAttrs(collateRows(r.rows))).subscribe(function(rows) {
+	else if(type === "mutationVector" || (type === "genomicSegment")) {
+		var queryFunction,
+			attributeFunction;
+		if (type === "mutationVector") {
+			queryFunction = xenaQuery.sparse_data_examples;
+			attributeFunction = mutationAttrs;
+		} else if (type === "genomicSegment") {
+			queryFunction = xenaQuery.segment_data_examples;
+			attributeFunction = segmentAttrs;
+		}
+
+		queryFunction(host, name, nProbes).map(r => attributeFunction(collateRows(r.rows))).subscribe(function(rows) {
 			if (rows && rows.length > 0) {
 				var i, j, key,
 					keys = Object.keys(rows[0]).sort(),
@@ -747,7 +773,9 @@ function datasetPage(dataset, host, baseNode) {
 	// status and loader warning
 	if (status === goodStatus && !loaderWarning) { // perfect data
 	} else if (status === goodStatus && loaderWarning) { // loaded with warning
-		tmpNode = domHelper.hrefLink(status + " with warning", "#");
+		tmpNode = domHelper.hrefLink("loaded with warning", "#");
+		tmpNode.style.color = "red";
+		tmpNode.style.textDecoration = "underline";
 		warningPopUp (tmpNode, loaderWarning);
 		sectionNode.appendChild(domHelper.elt("labelsameLength", "status"));
 		sectionNode.appendChild(domHelper.elt("resultsameLength", tmpNode));

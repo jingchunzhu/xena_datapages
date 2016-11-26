@@ -67,7 +67,7 @@ module.exports = function (main, state) {
 	node.appendChild(domHelper.elt("br"));
 
 	//list of hosts
-	hosts.forEach(function (host) {
+	hosts.map(function (host) {
 		node.appendChild(newHubNode(host));
 		node.appendChild(domHelper.elt("br"));
 		session.updateHostStatus(host);

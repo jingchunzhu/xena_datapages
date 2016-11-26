@@ -267,6 +267,12 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 		       `                    :limit ${count}})}`;
 	}
 
+	function segment_data_example_string(dataset, count) {
+		return `{:rows (xena-query {:select ["sampleID" "position" "value"]\n` +
+			   `                    :from [${quote(dataset)}]\n` +
+			   `                    :limit ${count}})}`;
+	}
+
 	function dataset_string(dataset) {
 		return '(:text (car (query {:select [:text]\n' +
 		       '                    :from [:dataset]\n' +
@@ -391,6 +397,12 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 		).map(json_resp);
 	}
 
+	function segment_data_examples(host, ds, count) {
+		return Rx.DOM.ajax(
+			xena_post(host, segment_data_example_string(ds, count))
+		).map(json_resp);
+	}
+
 	function dataset_probe_values(host, ds, samples, probes) {
 		return Rx.DOM.ajax(
 			xena_post(host, dataset_probe_string(ds, samples, probes))
@@ -494,6 +506,7 @@ define(['rx-dom', 'underscore', 'rx.binding'], function (Rx, _) {
 		dataset_field_examples: dataset_field_examples,
 		dataset_field: dataset_field,
 		sparse_data_examples: sparse_data_examples,
+		segment_data_examples: segment_data_examples,
 		dataset_probe_values: dataset_probe_values,
 		dataset_gene_probe_values: dataset_gene_probe_values,
 		dataset_genes_values: dataset_genes_values,
