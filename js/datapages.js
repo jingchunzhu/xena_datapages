@@ -339,12 +339,12 @@ function cohortPage(cohortName, hosts, rootNode) {
 					listNode;
 
 				dataTypes.map(function (type) {
+					var headerDisplayed;
 					displayType = type;
 					if (type === "undefined") {
 						displayType = "others";
 					}
 
-					nodeDataType.appendChild(domHelper.elt("header", displayType));
 					listNode = domHelper.elt("div");
 
 					_.sortBy(datasetsBySubtype[type], "label").map(function (dataset) {
@@ -353,8 +353,11 @@ function cohortPage(cohortName, hosts, rootNode) {
 							datasetNode = document.createElement("ul"),
 							dataSubType = dataset.dataSubType;
 
-						if ((dataSubType === "filter" || dataSubType === "Filter") && (dataset.host !== localHost)) {
+						if ((dataSubType.search(/filter/i) !== -1) && (dataset.host !== localHost)) {
 							return;
+						} else if (!headerDisplayed) {
+							nodeDataType.appendChild(domHelper.elt("header", displayType));
+							headerDisplayed = 1;
 						}
 
 						//info image
