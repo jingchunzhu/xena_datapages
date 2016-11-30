@@ -334,26 +334,25 @@ function cohortPage(cohortName, hosts, rootNode) {
 
 				var dataTypes = _.keys(datasetsBySubtype).sort(function (a, b) {
 						return a.toLowerCase().localeCompare(b.toLowerCase());
-					}),
-					displayType,
-					listNode;
+					});
 
-				dataTypes.map(function (type) {
-					var headerDisplayed;
-					displayType = type;
-					if (type === "undefined") {
+				dataTypes.map(function (dataSubType) {
+					var headerDisplayed,
+						listNode,
+						displayType = dataSubType;
+
+					if (dataSubType === "undefined") {
 						displayType = "others";
 					}
 
 					listNode = domHelper.elt("div");
 
-					_.sortBy(datasetsBySubtype[type], "label").map(function (dataset) {
+					_.sortBy(datasetsBySubtype[dataSubType], "label").map(function (dataset) {
 						var fullname = dataset.host + dataset.name,
 							link = "?dataset=" + dataset.name + "&host=" + dataset.host,
-							datasetNode = document.createElement("ul"),
-							dataSubType = dataset.dataSubType;
+							datasetNode = document.createElement("ul");
 
-						if ((dataSubType.search(/filter/i) !== -1) && (dataset.host !== localHost)) {
+						if (dataSubType && (dataSubType.search(/filter/i) !== -1) && (dataset.host !== localHost)) {
 							return;
 						} else if (!headerDisplayed) {
 							nodeDataType.appendChild(domHelper.elt("header", displayType));
