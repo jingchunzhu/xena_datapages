@@ -10,13 +10,15 @@ var _ = require("underscore");
 var Rx = require("rx");
 var xenaAdmin = require("./xenaAdmin");
 var lunr = require("lunr");
+var {defaultLocal} = require('./defaults');
 
 require("rx-dom");
 require("../css/datapages.css");
 
 var showdown = require('showdown');  /* https://github.com/showdownjs/showdown */
 
-var allHosts, activeHosts, userHosts, localHost, metadataFilterHosts;
+var {activeHosts} = session;
+var allHosts;
 
 var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if there is a query string
 	COHORT_NULL = '(unassigned)',
@@ -86,14 +88,14 @@ function deleteDataButton (dataset) {
 	var name = JSON.parse(dataset.dsID).name,
 		host = JSON.parse(dataset.dsID).host;
 
-	if((host === localHost) && ((dataset.status === session.GOODSTATUS ) || (dataset.status === "error"))) {
+	if((host === defaultLocal) && ((dataset.status === session.GOODSTATUS ) || (dataset.status === "error"))) {
 		var deletebutton = document.createElement("BUTTON");
 		deletebutton.setAttribute("class", "vizbutton");
 	  deletebutton.appendChild(document.createTextNode("Remove"));
 		deletebutton.addEventListener("click", function() {
 			var r = confirm("Delete \"" + name + "\" from my computer hub.");
 			if (r === true) {
-				xenaAdmin.delete(localHost, name).subscribe();
+				xenaAdmin.delete(defaultLocal, name).subscribe();
 			  location.reload(); // reload current page
 			}
 	  });
@@ -101,11 +103,16 @@ function deleteDataButton (dataset) {
 	}
 }
 
+function userActiveHosts(subset) {
+	var uAH = _.keys(allHosts).filter(h => allHosts[h].user && activeHosts.has(h));
+	return subset ? _.intersection(uAH, subset) : uAH;
+}
+
 function cohortHeatmapButton(cohort, hosts, vizbuttonParent) {
 	var vizbutton,
 		goodStatus = session.GOODSTATUS;
 
-	ifCohortExistDo(cohort, _.intersection(_.intersection(activeHosts, hosts), userHosts), goodStatus, function() {
+	ifCohortExistDo(cohort, hosts, goodStatus, function() {
 		vizbutton = document.createElement("BUTTON");
 		vizbutton.setAttribute("class", "vizbutton");
 		vizbutton.appendChild(document.createTextNode("Visualize"));
@@ -213,7 +220,7 @@ function eachCohortMultiple(cohortName, hosts, node) {
 	}
 
 	//for single active host but not selected by user senario
-	if ((hosts.length === 1) &&  (userHosts.indexOf(hosts[0]) === -1)) {
+	if ((hosts.length === 1) && !allHosts[hosts[0]].user) {
 		nodeTitle.style.color = "gray";
 	}
 
@@ -223,7 +230,7 @@ function eachCohortMultiple(cohortName, hosts, node) {
 	//viz button
 	tmpNode = document.createElement("span");
 	liNode.appendChild(tmpNode);
-	cohortHeatmapButton(cohortName, _.intersection(activeHosts, userHosts), tmpNode);
+	cohortHeatmapButton(cohortName, userActiveHosts(), tmpNode);
 
 	// new status
 	tmpNode = document.createElement("span");
@@ -301,7 +308,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 			vizbuttonParent.appendChild(img);
 	}
 	vizbuttonParent.appendChild(document.createTextNode(cohortName));
-	cohortHeatmapButton(cohortName, _.intersection(activeHosts, userHosts), vizbuttonParent);
+	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent);
 
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
 		//dataset list
@@ -352,7 +359,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 							link = "?dataset=" + dataset.name + "&host=" + dataset.host,
 							datasetNode = document.createElement("ul");
 
-						if (dataSubType && (dataSubType.search(/filter/i) !== -1) && (dataset.host !== localHost)) {
+						if (dataSubType && (dataSubType.search(/filter/i) !== -1) && (dataset.host !== defaultLocal)) {
 							return;
 						} else if (!headerDisplayed) {
 							nodeDataType.appendChild(domHelper.elt("header", displayType));
@@ -760,9 +767,7 @@ function datasetPage(dataset, host, baseNode) {
 
 	// viz button
 	if (status === goodStatus) {
-		cohortHeatmapButton(cohort,
-			_.intersection( _.intersection(activeHosts, userHosts), [host]),
-			vizbuttonParent);
+		cohortHeatmapButton(cohort, userActiveHosts([host]), vizbuttonParent);
 	}
 	sectionNode.appendChild(domHelper.elt("br"));
 
@@ -1106,8 +1111,7 @@ function datasetSideBar(dataset, sideNode) {
 	sideNode.appendChild(tmpNode);
 	if (dataset.status === session.GOODSTATUS) {
 		cohortHeatmapButton(dataset.cohort,
-			_.intersection( _.intersection(activeHosts, userHosts), [JSON.parse(dataset.dsID).host]),
-			tmpNode);
+			userActiveHosts([JSON.parse(dataset.dsID).host]), tmpNode);
 	}
 
 	//download button
@@ -1290,7 +1294,7 @@ function frontPage (baseNode) {
 
 		cohortNode.innerHTML = ""; //clear cohortList
 		if (query === "") {  // all cohorts
-			cohortListPage(_.intersection(activeHosts, metadataFilterHosts), cohortNode);
+			cohortListPage(userActiveHosts(), cohortNode);
 			inputBox.disabled = false;
 			searchButton.disabled = false;
 			resetButton.disabled = false;
@@ -1301,7 +1305,7 @@ function frontPage (baseNode) {
 		cohortNode.appendChild(spinner);
 
 		if (!indxObj.index) {
-			buildIndex (indxObj, _.intersection(activeHosts, metadataFilterHosts));
+			buildIndex (indxObj, userActiveHosts());
 		}
 
 		timer = setInterval(function() {
@@ -1338,7 +1342,7 @@ function frontPage (baseNode) {
 		resetButton.addEventListener("click", function () {
 			document.getElementById("dataPageQuery").value = "";
 			cohortNode.innerHTML = "";
-			cohortListPage(_.intersection(activeHosts, metadataFilterHosts), cohortNode);
+			cohortListPage(userActiveHosts(), cohortNode);
 		});
 	}
 
@@ -1363,7 +1367,7 @@ function frontPage (baseNode) {
 	mainNode.appendChild(cohortNode);
 
 	//cohort list
-	cohortListPage(_.intersection(activeHosts, metadataFilterHosts), cohortNode);
+	cohortListPage(userActiveHosts(), cohortNode);
 	container.appendChild(mainNode);
 
 	//the end
@@ -1410,16 +1414,16 @@ var initialized = false;
 module.exports = (baseNode, state) => {
 	session.setState(state);
 
-	allHosts = state.allHosts; // all hosts
-	activeHosts = state.activeHosts; // activetHosts
-	userHosts = state.userHosts; // selectedtHosts
-	localHost = state.localHost; //localhost
-	metadataFilterHosts = state.metadataFilterHosts; // metadataFilter
+	allHosts = state;
 
 	if (initialized) {
 		return;
 	}
 	initialized = true;
+
+	// Initially mark all hosts active. We will update them later.
+	_.keys(allHosts).forEach(h => session.activeHosts.add(h));
+
 	var container, sideNode, mainNode,
 		keys = Object.keys(queryString),
 		host = queryString.host,
@@ -1434,7 +1438,7 @@ module.exports = (baseNode, state) => {
 
 	// ?host=id
 	if (keys.length === 1 && host) {
-		if (allHosts.indexOf(host) === -1) {
+		if (!_.has(allHosts, host)) {
 			return;
 		}
 		hostPage (baseNode, host);
@@ -1487,7 +1491,7 @@ module.exports = (baseNode, state) => {
 		mainNode = domHelper.elt("div");
 		mainNode.setAttribute("id", "dataPagesMain");
 
-		cohortPage(cohort, _.intersection(activeHosts, metadataFilterHosts), mainNode);
+		cohortPage(cohort, userActiveHosts(), mainNode);
 		container.appendChild(mainNode);
 
 		container.appendChild(domHelper.elt("br"));

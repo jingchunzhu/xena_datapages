@@ -2,7 +2,6 @@
 
 var xenaQuery = require("./xenaQuery");
 var domHelper = require("./dom_helper");
-var _ = require("./underscore_ext");
 var controller = require("./controller");
 
 
@@ -20,6 +19,7 @@ defaultNames[defaultTOIL] = "GA4GH-BD2K (TOIL) hub";
 defaultNames[defaultPCAWG] = "PCAWG public hub";
 
 var xenaState;
+var activeHosts = new Set();
 
 function sessionStorageCallback(ev) {
 	throw new Error('sessionStorageCallback is broken');
@@ -33,7 +33,7 @@ function xenaHeatmapSetCohort(cohortname) {
 }
 
 function addHostToListInSession(list, host) {
-	callback(['add-host', list, host]);
+	callback(['enable-host', host, list]);
 }
 
 function updateHostDOM(host, status) {
@@ -95,30 +95,27 @@ function updateHostDOM(host, status) {
 }
 
 function removeHostFromListInSession(list, host) {
-	callback(['remove-host', list, host]);
+	callback(['disable-host', host, list]);
 }
 
 function updateHostStatus(host) {
-	addHostToListInSession('allHosts', host);
-
 	xenaQuery.test_host(host).subscribe(function (s) {
-		var userHosts = xenaState.userHosts;
 		if (s) {
 			// test if host can return useful data
 			var start = Date.now();
 			xenaQuery.all_cohorts(host).subscribe(function (s) {
 				var duration;
 				if (s.length > 0) {
-					addHostToListInSession('activeHosts', host);
-					updateHostDOM(host, (userHosts.indexOf(host) !== -1) ? 'live_selected' : 'live_unselected');
+					activeHosts.add(host);
+					updateHostDOM(host, xenaState[host].user ? 'live_selected' : 'live_unselected');
 				} else {
 					duration = Date.now() - start;
-					removeHostFromListInSession('activeHosts', host);
+					activeHosts.delete(host);
 					updateHostDOM(host, (duration > 3000) ? 'slow' : 'nodata');
 				}
 			});
 		} else {
-			removeHostFromListInSession('activeHosts', host);
+			activeHosts.delete(host);
 			updateHostDOM(host, 'dead');
 		}
 	});
@@ -133,77 +130,22 @@ function getHubName(host) {
 	}
 }
 
-function hostCheckBox(host) {
-	var userHosts = xenaState.userHosts,
-		node = domHelper.elt("div"),
-		checkbox = document.createElement("INPUT"),
-		labelText = domHelper.elt('label');
-
-	function checkBoxLabel() {
-		if (checkbox.checked) {
-			labelText.style.color = "gray";
-			labelText.innerHTML = "selected";
-		}
-		else {
-			labelText.innerHTML = "&nbsp";
-		}
-		updateHostStatus(host);
-	}
-
-	checkbox.setAttribute("type", "checkbox");
-	checkbox.setAttribute("id", "checkbox" + host);
-	checkbox.setAttribute("class", "hubcheck");
-	checkbox.checked = _.contains(userHosts, host);
-	labelText.setAttribute("for", "checkbox" + host);
-	labelText.setAttribute("id", "hubLabel" + host);
-	checkBoxLabel();
-
-	node.appendChild(checkbox);
-	node.appendChild(labelText);
-
-	checkbox.addEventListener('click', function () {
-		var checked = checkbox.checked;
-
-		if (checked !== _.contains(xenaState.userHosts, host)) {
-			if (checked) { // add host
-				addHostToListInSession('userHosts', host);
-				addHostToListInSession('metadataFilterHosts', host);
-			} else { // remove host
-				removeHostFromListInSession('userHosts', host);
-				removeHostFromListInSession('metadataFilterHosts', host);
-
-				//check if host that will be removed has the "cohort" in the xena heatmap state setting ///////////TODO
-// XXX This seems wrong. If the cohort is on multiple hosts, it still resets the heatmap.
-//					xenaQuery.all_cohorts(host).subscribe(function (s) {
-//						var xenaState = JSON.parse(sessionStorage.xena);
-//						if (xenaState.cohort && _.contains(s, xenaState.cohort)) { // reset xenaHeatmap
-//							xenaHeatmapStateReset();
-//						}
-//					});
-			}
-			checkBoxLabel();
-		}
-	});
-
-	return node;
-}
 
 function metaDataFilterCheckBox(host, ifChangedAction) {
-	var metadataFilterHosts = xenaState.metadataFilterHosts,
-			checkbox = document.createElement("INPUT");
+	var checkbox = document.createElement("INPUT");
 
 	checkbox.setAttribute("type", "checkbox");
 	checkbox.setAttribute("id", "checkbox" + host);
-	checkbox.checked = _.contains(metadataFilterHosts, host);
+	checkbox.checked = xenaState[host].user;
 
 	checkbox.addEventListener('click', function () {
 		var checked = checkbox.checked;
 
-		if (checked !== _.contains(xenaState.metadataFilterHosts, host)) {
+		if (checked !== xenaState[host].user) {
 			if (checked) { // add host
-				addHostToListInSession('metadataFilterHosts', host);
+				addHostToListInSession('user', host);
 			} else { // remove host
-				removeHostFromListInSession('metadataFilterHosts', host);
+				removeHostFromListInSession('user', host);
 			}
 			if (ifChangedAction) {
 				ifChangedAction.apply(null, arguments);
@@ -215,8 +157,8 @@ function metaDataFilterCheckBox(host, ifChangedAction) {
 }
 
 module.exports = {
+	activeHosts,
 	updateHostStatus: updateHostStatus,
-	hostCheckBox: hostCheckBox,
 	metaDataFilterCheckBox: metaDataFilterCheckBox,
 	xenaHeatmapSetCohort: xenaHeatmapSetCohort,
 	getHubName: getHubName,
