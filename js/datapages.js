@@ -1085,7 +1085,7 @@ function hubSideBar(hosts) {
 		applybutton.setAttribute("class", "vizbutton");
 		applybutton.appendChild(document.createTextNode("Apply"));
 		applybutton.addEventListener("click", function() {
-		location.reload();
+			location.reload();
 		});
 	sideNode.appendChild(applybutton);
 
@@ -1439,7 +1439,12 @@ module.exports = (baseNode, state) => {
 	// ?host=id
 	if (keys.length === 1 && host) {
 		if (!_.has(allHosts, host)) {
-			return;
+			allHosts[host] = {"user": true};
+			xenaQuery.test_host(host).subscribe(function (s) {
+				if (!s) {
+					allHosts[host] = undefined;
+				}
+			});
 		}
 		hostPage (baseNode, host);
 	}
