@@ -1427,6 +1427,7 @@ module.exports = (baseNode, state) => {
 	var container, sideNode, mainNode,
 		keys = Object.keys(queryString),
 		host = queryString.host,
+		hub = queryString.hub,
 		dataset = decodeURIComponent(queryString.dataset),
 		cohort = decodeURIComponent(queryString.cohort),
 		sample = decodeURIComponent(queryString.sample),
@@ -1437,14 +1438,10 @@ module.exports = (baseNode, state) => {
 		allSamples = queryString.allSamples;
 
 	// ?host=id
-	if (keys.length === 1 && host) {
+	if ( keys.length === 1 && (host || hub) ) {
+		host = hub ? hub : host;
 		if (!_.has(allHosts, host)) {
-			allHosts[host] = {"user": true};
-			xenaQuery.test_host(host).subscribe(function (s) {
-				if (!s) {
-					allHosts[host] = undefined;
-				}
-			});
+			return;
 		}
 		hostPage (baseNode, host);
 	}
