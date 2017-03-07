@@ -41,8 +41,13 @@ function checkGenomicDataset(hosts, cohort, goodStatus) {
 			if (r.datasets) {
 				return r.datasets.some(function (dataset) {
 					var format = dataset.type,
-							status = dataset.status;
-					return ((goodStatus ? (status === goodStatus) : true) && (NOT_GENOMICS.indexOf(format) === -1));
+						dataSubType = dataset.dataSubType,
+						patt = /filter/i,
+						status = dataset.status;
+					return ((goodStatus ? (status === goodStatus) : true) &&
+							(NOT_GENOMICS.indexOf(format) === -1) &&
+							(dataSubType ? !(patt.test(dataSubType)): true)
+							);
 				});
 			}
 			return false;
@@ -57,8 +62,13 @@ function checkGenomicDatasetAllBad(hosts, cohort, goodStatus) {
 			if (r.datasets && r.datasets.length > 0) {
 				return r.datasets.some(function (dataset) {
 					var format = dataset.type,
-							status = dataset.status;
-					return ((goodStatus ? (status !== goodStatus) : false) || (NOT_GENOMICS.indexOf(format) !== -1));
+						dataSubType = dataset.dataSubType,
+						patt = /filter/i,
+						status = dataset.status;
+					return ((goodStatus ? (status !== goodStatus) : false) ||
+							(NOT_GENOMICS.indexOf(format) !== -1) ||
+							(dataSubType ? patt.test(dataSubType): false)
+							);
 				});
 			}
 			return true;
@@ -316,7 +326,6 @@ function cohortPage(cohortName, hosts, rootNode) {
 			function (s) {
 				//collection datasets by dataSubType
 				var datasetsBySubtype = {};
-
 				_.map(s, r => {
 					var host = r.server,
 						datasets = r.datasets;
