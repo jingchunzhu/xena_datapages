@@ -99,11 +99,11 @@ function removeHostFromListInSession(list, host) {
 }
 
 function updateHostStatus(host) {
-	xenaQuery.test_host(host).subscribe(function (s) {
+	xenaQuery.testHost(host).subscribe(function (s) {
 		if (s) {
 			// test if host can return useful data
 			var start = Date.now();
-			xenaQuery.all_cohorts(host).subscribe(function (s) {
+			xenaQuery.allCohorts(host).subscribe(function (s) {
 				var duration;
 				if (s.length > 0) {
 					activeHosts.add(host);

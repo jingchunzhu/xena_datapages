@@ -7,12 +7,11 @@ var domHelper = require("./dom_helper");
 var xenaQuery = require("./xenaQuery");
 var session = require("./session");
 var _ = require("underscore");
-var Rx = require("rx");
+var Rx = require("./rx");
 var xenaAdmin = require("./xenaAdmin");
 var lunr = require("lunr");
 var {defaultLocal} = require('./defaults');
 
-require("rx-dom");
 require("../css/datapages.css");
 
 var showdown = require('showdown');  /* https://github.com/showdownjs/showdown */
@@ -34,9 +33,18 @@ var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if
 	treehouseImg = require('../images/Treehouse.jpg'),
 	infoImgSource = require('../images/Info.png');
 
+function datasetList(servers, cohort) {
+	return Rx.Observable.zipArray(
+			_.map(servers, server => xenaQuery.datasetList(server, [cohort])
+				.catch(() => Rx.Observable.of([]))
+				.map(datasets => ({server, datasets})))
+	);
+}
+
+
 // check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
 function checkGenomicDataset(hosts, cohort, goodStatus) {
-	return xenaQuery.dataset_list(hosts, cohort).map(function (s) {
+	return datasetList(hosts, cohort).map(function (s) {
 		return s.some(function (r) {
 			if (r.datasets) {
 				return r.datasets.some(function (dataset) {
@@ -57,7 +65,7 @@ function checkGenomicDataset(hosts, cohort, goodStatus) {
 
 // check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
 function checkGenomicDatasetAllBad(hosts, cohort, goodStatus) {
-	return xenaQuery.dataset_list(hosts, cohort).map(function (s) {
+	return datasetList(hosts, cohort).map(function (s) {
 		return s.every(function (r) {
 			if (r.datasets && r.datasets.length > 0) {
 				return r.datasets.some(function (dataset) {
@@ -266,7 +274,7 @@ function cohortListPage(hosts, rootNode) {
 
 	var source = Rx.Observable.zipArray(
 		hosts.map(function (host) {
-			return xenaQuery.all_cohorts(host);
+			return xenaQuery.allCohorts(host).catch(() => Rx.Observable.of([]));
 		})
 	);
 
@@ -322,7 +330,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
 		//dataset list
-		xenaQuery.dataset_list(hosts, cohortName).subscribe(
+		datasetList(hosts, cohortName).subscribe(
 			function (s) {
 				//collection datasets by dataSubType
 				var datasetsBySubtype = {};
@@ -387,7 +395,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 						//status
 						if (dataset.status === session.GOODSTATUS ) { // good data, with or without warning
 							datasetNode.appendChild(domHelper.valueNode(fullname + "sampleN"));
-							xenaQuery.dataset_samples(dataset.host, dataset.name).subscribe(function (s) {
+							xenaQuery.datasetSamples(dataset.host, dataset.name).subscribe(function (s) {
 								document.getElementById(fullname + "sampleN").
 								appendChild(domHelper.elt("label", document.createTextNode(" (n=" + s.length.toLocaleString() + ")")));
 							});
@@ -444,7 +452,7 @@ function metaDataLink(dataset) {
 }
 
 function updataDOMXenaDataSetSampleN(DOM_ID, host, dataset) {
-	xenaQuery.dataset_samples(host, dataset).subscribe(function (s) {
+	xenaQuery.datasetSamples(host, dataset).subscribe(function (s) {
 		var tag = "result";
 		var node = document.getElementById(DOM_ID);
 		node.parentNode.replaceChild(domHelper.elt(tag, (s.length.toLocaleString())), node);
@@ -562,12 +570,12 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 
 	if ((type === "genomicMatrix")  || (type === "clinicalMatrix")) {
 		//data snippet samples, probes
-		xenaQuery.dataset_samples(host, name).subscribe(
+		xenaQuery.datasetSamples(host, name).subscribe(
 			function (samples) {
 				allSamples = samples.length;
 				samples = samples.slice(0, nSamples);
 
-				var query = xenaQuery.dataset_field(host, name);
+				var query = xenaQuery.datasetField(host, name);
 
 				query.subscribe(function (s) {
 					allProbes = s.map(function (probe) {
@@ -576,14 +584,14 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 					var probes = allProbes.slice(0, nProbes);
 					allProbes = allProbes.length;
 
-					xenaQuery.code_list(host, name, probes).subscribe(function(codemap) {
+					xenaQuery.codeList(host, name, probes).subscribe(function(codemap) {
 						//return probes by all_samples
 						var row, column,
 							dataRow, dataCol,
 							i, j,
 							firstRow, firstCol;
 
-						xenaQuery.dataset_probe_values(host, name, samples, probes).subscribe( function (s) {
+						xenaQuery.datasetProbeValues(host, name, samples, probes).subscribe( function (s) {
 							if (type === "genomicMatrix") {
 								firstCol = probes;
 								firstRow = samples;
@@ -652,10 +660,10 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 		var queryFunction,
 			attributeFunction;
 		if (type === "mutationVector") {
-			queryFunction = xenaQuery.sparse_data_examples;
+			queryFunction = xenaQuery.sparseDataExamples;
 			attributeFunction = mutationAttrs;
 		} else if (type === "genomicSegment") {
-			queryFunction = xenaQuery.segment_data_examples;
+			queryFunction = xenaQuery.segmentDataExamples;
 			attributeFunction = segmentAttrs;
 		}
 
@@ -970,11 +978,11 @@ function datasetPage(dataset, host, baseNode) {
 		node2 = undefined;
 	}
 
-	xenaQuery.dataset_samples(host, name).subscribe(function (s) {
+	xenaQuery.datasetSamples(host, name).subscribe(function (s) {
 		if (node) {
 			node.innerHTML = s.length.toLocaleString() + " samples ";
 		}
-		xenaQuery.dataset_field(host, name).subscribe(function(probes) {
+		xenaQuery.datasetField(host, name).subscribe(function(probes) {
 			if (node2) {
 				node2.innerHTML = probes.length.toLocaleString() + " identifiers ";
 			}
@@ -1026,7 +1034,7 @@ function allIdentifiersPage (host, dataset, label) {
 	rootNode.appendChild(textNode);
 
 	text = "Identifiers\n";
-	xenaQuery.dataset_field(host, dataset).subscribe(function(probes) {
+	xenaQuery.datasetField(host, dataset).subscribe(function(probes) {
 		probes.forEach(function(probe) {
 			text = text + probe.name + "\n";
 		});
@@ -1044,7 +1052,7 @@ function allSamplesPage (host, dataset, label) {
 	rootNode.appendChild(textNode);
 
 	text = "Samples\n";
-	xenaQuery.dataset_samples(host, dataset).subscribe(function(samples) {
+	xenaQuery.datasetSamples(host, dataset).subscribe(function(samples) {
 		samples.forEach(function(sample) {
 			text = text + sample + "\n";
 		});
@@ -1151,7 +1159,7 @@ function bigDataSnippetPage (host, dataset, nSamples, nProbes) {
 	node.appendChild( blockNode );
 	blockNode.style.color = "red";
 
-	xenaQuery.dataset_by_name(host, dataset).subscribe(
+	xenaQuery.datasetMetadata(host, dataset).subscribe(
 		function (datasets) {
 			var label = datasets[0].label ? datasets[0].label : datasets[0].name;
 
@@ -1178,7 +1186,7 @@ function buildIndex (idxObj, hosts) {
 
 	var source = Rx.Observable.zipArray(
 	  hosts.map(function (host) {
-		return xenaQuery.all_datasets(host);
+		return xenaQuery.allDatasets(host).catch(() => Rx.Observable.of([]));
 	  })
 	);
 
@@ -1387,7 +1395,7 @@ function frontPage (baseNode) {
 //testing your markdowns http://showdownjs.github.io/demo/
 function renderMarkDownFile(file, node)
 {
-	Rx.DOM.get(file).subscribe(function(resp) {
+	Rx.Observable.ajaxGet(file).subscribe(function(resp) {
 		var converter = new showdown.Converter();
 		node.innerHTML = converter.makeHtml(resp.responseText);
 		node.appendChild(document.createElement("br"));
@@ -1420,7 +1428,9 @@ function hostPage (baseNode, host) {
 }
 
 var initialized = false;
-module.exports = (baseNode, state) => {
+module.exports = (baseNode, state, callback, xQ) => {
+	session.setCallback(callback);
+	_.extend(xenaQuery, xQ);
 	session.setState(state);
 
 	allHosts = state;
@@ -1471,7 +1481,7 @@ module.exports = (baseNode, state) => {
 
 		baseNode.appendChild(container);
 
-		xenaQuery.dataset_by_name(host, dataset).subscribe(
+		xenaQuery.datasetMetadata(host, dataset).subscribe(
 			function (s) {
 				if (s.length) {
 					//dataset sidebar

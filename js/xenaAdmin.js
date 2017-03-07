@@ -1,6 +1,6 @@
 /*global define: false */
 'use strict';
-define(['rx-dom', './underscore_ext'], function (Rx, _) {
+define(['./rx', './underscore_ext'], function (Rx, _) {
 	function expandArrays(v, k) {
 		if (_.isArray(v)) {
 			return _.zip(v, _.times(v.length, _.constant(k)));
@@ -28,10 +28,10 @@ define(['rx-dom', './underscore_ext'], function (Rx, _) {
 
 	return {
 		load: function (host, files, always) {
-			return Rx.DOM.ajax(update(host, files, always ? {always: true} : {}));
+			return Rx.Observable.ajax(update(host, files, always ? {always: true} : {}));
 		},
 		delete: function (host, files) {
-			return Rx.DOM.ajax(update(host, files, {"delete": true}));
+			return Rx.Observable.ajax(update(host, files, {"delete": true}));
 		}
 	};
 });
