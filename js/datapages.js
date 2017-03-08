@@ -54,7 +54,7 @@ function checkGenomicDataset(hosts, cohort, goodStatus) {
 						status = dataset.status;
 					return ((goodStatus ? (status === goodStatus) : true) &&
 							(NOT_GENOMICS.indexOf(format) === -1) &&
-							(dataSubType ? !(patt.test(dataSubType)): true)
+							(dataSubType ? !(patt.test(dataSubType)) : true)
 							);
 				});
 			}
@@ -75,7 +75,7 @@ function checkGenomicDatasetAllBad(hosts, cohort, goodStatus) {
 						status = dataset.status;
 					return ((goodStatus ? (status !== goodStatus) : false) ||
 							(NOT_GENOMICS.indexOf(format) !== -1) ||
-							(dataSubType ? patt.test(dataSubType): false)
+							(dataSubType ? patt.test(dataSubType) : false)
 							);
 				});
 			}
