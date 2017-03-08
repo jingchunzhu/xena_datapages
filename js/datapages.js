@@ -472,7 +472,7 @@ function addMoreDataLink (dataset, probesLength, linkNode) {
 		},
 		link;
 
-	if (format === "mutationVector" ) {
+	if (format === "mutationVector" || format === "genomicSegment") {
 		qStringObj.nProbes = 1000;
 	}
 	if (format === "genomicMatrix" ) {
@@ -584,7 +584,7 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 					var probes = allProbes.slice(0, nProbes);
 					allProbes = allProbes.length;
 
-					xenaQuery.codeList(host, name, probes).subscribe(function(codemap) {
+					xenaQuery.fieldCodes(host, name, probes).subscribe(function(codemap) {
 						//return probes by all_samples
 						var row, column,
 							dataRow, dataCol,
@@ -626,16 +626,12 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 							}
 
 							//data cell
-							for(i = 1; i < s.length + 1; i++) {
+							for(i = 1; i < s[1].length + 1; i++) {
 								var probe = probes[i - 1],
 									value, code;
 
 								for (j = 1; j < samples.length + 1; j++) {
-									if (type === "genomicMatrix") {
-										value = s[i - 1][j - 1];
-									} else {
-										value = s[i - 1][j - 1];
-									}
+									value = s[1][i - 1][j - 1];
 									code = undefined;
 									if (codemap[probe]) {
 										if(!isNaN(value)) {
@@ -666,7 +662,6 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 			queryFunction = xenaQuery.segmentDataExamples;
 			attributeFunction = segmentAttrs;
 		}
-
 		queryFunction(host, name, nProbes).map(r => attributeFunction(collateRows(r.rows))).subscribe(function(rows) {
 			if (rows && rows.length > 0) {
 				var i, j, key,
@@ -1152,7 +1147,6 @@ function bigDataSnippetPage (host, dataset, nSamples, nProbes) {
 		rootNode = domHelper.sectionNode("bigDataSnippet"),
 		node = document.createElement("div");
 
-	document.title = dataset;
 	document.body.appendChild(rootNode);
 	rootNode.appendChild(node);
 	node.appendChild( domHelper.elt("h3", "dataset: " + dataset, backtoDatasetButton(host, dataset)));
@@ -1161,11 +1155,9 @@ function bigDataSnippetPage (host, dataset, nSamples, nProbes) {
 
 	xenaQuery.datasetMetadata(host, dataset).subscribe(
 		function (datasets) {
-			var label = datasets[0].label ? datasets[0].label : datasets[0].name;
-
-			document.title = label;
-			blockNode.parentNode.replaceChild(domHelper.elt("div", "Querying xena on " + host + " ... "), blockNode);
-			dataSnippets(datasets[0], nSamples, nProbes, node);
+			var newBlockNode = domHelper.elt("div", "Querying xena on " + host + " ... ");
+			blockNode.parentNode.replaceChild(newBlockNode, blockNode);
+			dataSnippets(datasets[0], nSamples, nProbes, newBlockNode);
 		}
 	);
 }
@@ -1451,8 +1443,8 @@ module.exports = (baseNode, state, callback, xQ) => {
 		cohort = decodeURIComponent(queryString.cohort),
 		sample = decodeURIComponent(queryString.sample),
 		label = decodeURIComponent(queryString.label),
-		nSamples = queryString.nSamples,
-		nProbes = queryString.nProbes,
+		nSamples = Number(queryString.nSamples),
+		nProbes = Number(queryString.nProbes),
 		allIdentifiers = queryString.allIdentifiers,
 		allSamples = queryString.allSamples;
 
