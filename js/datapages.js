@@ -1395,7 +1395,7 @@ function frontPage (baseNode) {
 //testing your markdowns http://showdownjs.github.io/demo/
 function renderMarkDownFile(file, node)
 {
-	Rx.Observable.ajaxGet(file).subscribe(function(resp) {
+	Rx.Observable.ajax({url: file, crossDomain: true, method: 'GET'}).subscribe(function(resp) {
 		var converter = new showdown.Converter();
 		node.innerHTML = converter.makeHtml(resp.responseText);
 		node.appendChild(document.createElement("br"));
