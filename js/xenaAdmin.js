@@ -19,10 +19,11 @@ define(['./rx', './underscore_ext'], function (Rx, _) {
 	function update(host, files, flags) {
 		files = _.isArray(files) ? files : [files];
 		return {
-			headers: {'Content-Type': 'application/x-www-form-urlencoded' },
+			headers: {'Content-Type': 'application/x-www-form-urlencoded'},
 			url: host + '/update/',
 			body: encodeObject(_.extend({file: files}, flags)),
-			method: 'POST'
+			method: 'POST',
+			crossDomain: true
 		};
 	}
 
@@ -31,7 +32,7 @@ define(['./rx', './underscore_ext'], function (Rx, _) {
 			return Rx.Observable.ajax(update(host, files, always ? {always: true} : {}));
 		},
 		delete: function (host, files) {
-			return Rx.Observable.ajax(update(host, files, {"delete": true}));
+			return Rx.Observable.ajax(update(host, files, {delete: true}));
 		}
 	};
 });

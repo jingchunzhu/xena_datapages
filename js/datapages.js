@@ -109,12 +109,12 @@ function deleteDataButton (dataset) {
 	if((host === defaultLocal) && ((dataset.status === session.GOODSTATUS ) || (dataset.status === "error"))) {
 		var deletebutton = document.createElement("BUTTON");
 		deletebutton.setAttribute("class", "vizbutton");
-	  deletebutton.appendChild(document.createTextNode("Remove"));
+		deletebutton.appendChild(document.createTextNode("Remove"));
 		deletebutton.addEventListener("click", function() {
 			var r = confirm("Delete \"" + name + "\" from my computer hub.");
 			if (r === true) {
 				xenaAdmin.delete(defaultLocal, name).subscribe();
-			  location.reload(); // reload current page
+				location.reload(); // reload current page
 			}
 	  });
 	  return deletebutton;
