@@ -1025,15 +1025,17 @@ function allIdentifiersPage (host, dataset, label) {
 
 	document.body.appendChild(rootNode);
 	rootNode.appendChild(domHelper.elt("h3", "dataset: " + label, backtoDatasetButton(host, dataset)));
-	textNode = document.createElement("pre");
+	textNode = domHelper.elt("div", "Querying xena on " + host + " ... ");
 	rootNode.appendChild(textNode);
 
-	text = "Identifiers\n";
 	xenaQuery.datasetField(host, dataset).subscribe(function(probes) {
+		var newBlockNode = document.createElement("pre");
+		text = "Identifiers\n";
 		probes.forEach(function(probe) {
 			text = text + probe.name + "\n";
 		});
-		textNode.innerHTML = text;
+		newBlockNode.innerHTML = text;
+		textNode.parentNode.replaceChild(newBlockNode, textNode);
 	});
 }
 
