@@ -18,8 +18,16 @@ function updateAllHosts(state) {
 	});
 }
 
+function setHubs(state, {hubs}) {
+	return hubs ?
+		hubs.reduce(
+			(state, hub) =>_.assocIn(state, ['servers', hub, 'user'], true),
+			state) :
+		state;
+}
+
 var controls = {
-	init: state => _.updateIn(state, ['servers'], s => _.merge(defaultState, s)),
+	init: (state, params) => setHubs(_.updateIn(state, ['servers'], s => _.merge(defaultState, s)), params),
 	'init-post!': (serverBus, state, newState) => updateAllHosts(newState),
 	'add-host': (state, list, host) =>
 		setUserServers(_.updateIn(state, ['servers', list], l => _.union(l, [host]))),
