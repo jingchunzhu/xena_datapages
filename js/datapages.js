@@ -462,12 +462,12 @@ function metaDataLink(dataset) {
 function updataDOMXenaDataSetSampleN(DOM_ID, host, dataset) {
 	var tag = "result";
 	if (denseMatrixType.indexOf(dataset.type) === -1) {
-		xenaQuery.datasetSamples(host, dataset).subscribe(function (s) {
+		xenaQuery.datasetSamples(host, dataset.name).subscribe(function (s) {
 			var node = document.getElementById(DOM_ID);
 			node.parentNode.replaceChild(domHelper.elt(tag, (s.length.toLocaleString())), node);
 		});
 	} else {
-		xenaQuery.datasetSamplesNDenseMatrix(host, dataset).subscribe(function (s) {
+		xenaQuery.datasetSamplesNDenseMatrix(host, dataset.name).subscribe(function (s) {
 			var node = document.getElementById(DOM_ID);
 			node.parentNode.replaceChild(domHelper.elt(tag, (s.toLocaleString())), node);
 		});
@@ -491,7 +491,7 @@ function addMoreDataLink (dataset, probesLength, linkNode) {
 		qStringObj.nProbes = 1000;
 	}
 	if (format === "genomicMatrix" ) {
-		qStringObj.nProbes = 1000;
+		qStringObj.nProbes = 100;
 	}
 	if (format === "clinicalMatrix") {
 		qStringObj.nSamples = 500;
@@ -838,7 +838,7 @@ function datasetPage(dataset, host, baseNode) {
 	// samples: n
 	sectionNode.appendChild(domHelper.elt("labelsameLength", "samples"));
 	sectionNode.appendChild(domHelper.valueNode(dataset + "SampleN"));
-	updataDOMXenaDataSetSampleN(dataset + "SampleN", host, name);
+	updataDOMXenaDataSetSampleN(dataset + "SampleN", host, dataset);
 	sectionNode.appendChild(domHelper.elt("br"));
 
 	// update on: xxx
