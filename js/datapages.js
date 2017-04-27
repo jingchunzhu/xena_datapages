@@ -576,8 +576,7 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 	var table,
 		host = JSON.parse(dataset.dsID).host,
 		name = dataset.name,
-		type = dataset.type,
-		allSamples, allProbes;
+		type = dataset.type;
 
 	if (!type ) {  // when type is not specified, xena loader treat the file as genomicMatrix
 		type = "genomicMatrix";
@@ -585,19 +584,14 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 
 	if ((type === "genomicMatrix")  || (type === "clinicalMatrix")) {
 		//data snippet samples, probes
-		xenaQuery.datasetSamples(host, name).subscribe(
+		xenaQuery.datasetSamplesExamples(host, name, nSamples).subscribe(
 			function (samples) {
-				allSamples = samples.length;
-				samples = samples.slice(0, nSamples);
+				var query = xenaQuery.datasetFieldExamples(host, name, nProbes);
 
-				var query = xenaQuery.datasetField(host, name);
-
-				query.subscribe(function (s) {
-					allProbes = s.map(function (probe) {
+				query.subscribe(function (probes) {
+					probes = probes.map(function (probe) {
 						return probe.name;
 					});
-					var probes = allProbes.slice(0, nProbes);
-					allProbes = allProbes.length;
 
 					xenaQuery.fieldCodes(host, name, probes).subscribe(function(codemap) {
 						//return probes by all_samples
@@ -623,11 +617,11 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 							node.parentNode.replaceChild(table, node);
 
 							if (type === "genomicMatrix") {
-								dataCol = (column >= allSamples) ? column : nSamples - 1;    //sample
-								dataRow = (row >= allProbes) ? row : nProbes - 1; //probe
+								dataCol = column; //sample
+								dataRow = row; //probe
 							} else if (type === "clinicalMatrix") {
-								dataCol = (column >= allProbes) ? column : nProbes - 1; //probe
-								dataRow = (row >= allSamples) ? row : nSamples - 1; //sample
+								dataCol = column; //probe
+								dataRow = row; //sample
 							}
 
 							//first row -- labels
@@ -994,15 +988,15 @@ function datasetPage(dataset, host, baseNode) {
 		});
 	}
 
-	xenaQuery.datasetField(host, name).subscribe(function(probes) {
+	xenaQuery.datasetFieldN(host, name).subscribe(function(probesC) {
 		if (node2) {
-			node2.innerHTML = probes.length.toLocaleString() + " identifiers ";
+			node2.innerHTML = probesC.toLocaleString() + " identifiers ";
 		}
 		sectionNode.replaceChild(spaceHolderNode, oldNode);
 
 		tmpNode = domHelper.elt("a", "Show More Data");
 		tmpNode.setAttribute("class", "textLink");
-		addMoreDataLink(dataset, probes.length, tmpNode);
+		addMoreDataLink(dataset, probesC.length, tmpNode);
 		spaceHolderNode.appendChild(tmpNode);
 
 		tmpNode = domHelper.elt("a", "All Identifiers");
