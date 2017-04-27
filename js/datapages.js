@@ -31,7 +31,8 @@ var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if
 		'unknown': "unknown"
 	},
 	treehouseImg = require('../images/Treehouse.jpg'),
-	infoImgSource = require('../images/Info.png');
+	infoImgSource = require('../images/Info.png'),
+	denseMatrixType = ['genomicMatrix', 'clinicalMatrix'];
 
 function datasetList(servers, cohort) {
 	return Rx.Observable.zipArray(
@@ -395,10 +396,17 @@ function cohortPage(cohortName, hosts, rootNode) {
 						//status
 						if (dataset.status === session.GOODSTATUS ) { // good data, with or without warning
 							datasetNode.appendChild(domHelper.valueNode(fullname + "sampleN"));
-							xenaQuery.datasetSamples(dataset.host, dataset.name).subscribe(function (s) {
-								document.getElementById(fullname + "sampleN").
-								appendChild(domHelper.elt("label", document.createTextNode(" (n=" + s.length.toLocaleString() + ")")));
-							});
+							if (denseMatrixType.indexOf(dataset.type) === -1) {
+								xenaQuery.datasetSamples(dataset.host, dataset.name).subscribe(function (s) {
+									document.getElementById(fullname + "sampleN").
+									appendChild(domHelper.elt("label", document.createTextNode(" (n=" + s.length.toLocaleString() + ")")));
+								});
+							} else {
+								xenaQuery.datasetSamplesNDenseMatrix(dataset.host, dataset.name).subscribe(function (s) {
+									document.getElementById(fullname + "sampleN").
+									appendChild(domHelper.elt("label", document.createTextNode(" (n=" + s.toLocaleString() + ")")));
+								});
+							}
 						} else if (dataset.status === "error") {  // show error status
 							tmpNode = domHelper.elt("span", " [" + dataset.status + "] ");
 							tmpNode.style.color = "red";
@@ -452,11 +460,18 @@ function metaDataLink(dataset) {
 }
 
 function updataDOMXenaDataSetSampleN(DOM_ID, host, dataset) {
-	xenaQuery.datasetSamples(host, dataset).subscribe(function (s) {
-		var tag = "result";
-		var node = document.getElementById(DOM_ID);
-		node.parentNode.replaceChild(domHelper.elt(tag, (s.length.toLocaleString())), node);
-	});
+	var tag = "result";
+	if (denseMatrixType.indexOf(dataset.type) === -1) {
+		xenaQuery.datasetSamples(host, dataset).subscribe(function (s) {
+			var node = document.getElementById(DOM_ID);
+			node.parentNode.replaceChild(domHelper.elt(tag, (s.length.toLocaleString())), node);
+		});
+	} else {
+		xenaQuery.datasetSamplesNDenseMatrix(host, dataset).subscribe(function (s) {
+			var node = document.getElementById(DOM_ID);
+			node.parentNode.replaceChild(domHelper.elt(tag, (s.toLocaleString())), node);
+		});
+	}
 }
 
 function addMoreDataLink (dataset, probesLength, linkNode) {
@@ -973,31 +988,32 @@ function datasetPage(dataset, host, baseNode) {
 		node2 = undefined;
 	}
 
-	xenaQuery.datasetSamples(host, name).subscribe(function (s) {
-		if (node) {
-			node.innerHTML = s.length.toLocaleString() + " samples ";
-		}
-		xenaQuery.datasetField(host, name).subscribe(function(probes) {
-			if (node2) {
-				node2.innerHTML = probes.length.toLocaleString() + " identifiers ";
-			}
-			sectionNode.replaceChild(spaceHolderNode, oldNode);
-
-			tmpNode = domHelper.elt("a", "Show More Data");
-			tmpNode.setAttribute("class", "textLink");
-			addMoreDataLink(dataset, probes.length, tmpNode);
-			spaceHolderNode.appendChild(tmpNode);
-
-			tmpNode = domHelper.elt("a", "All Identifiers");
-			tmpNode.setAttribute("class", "textLink");
-			addAllIdLink(dataset, tmpNode);
-			spaceHolderNode.appendChild(tmpNode);
-
-			tmpNode = domHelper.elt("a", "All Samples");
-			tmpNode.setAttribute("class", "textLink");
-			addAllSampleLink(dataset, tmpNode);
-			spaceHolderNode.appendChild(tmpNode);
+	if (node) {
+		xenaQuery.datasetSamplesNDenseMatrix(host, name).subscribe(function (s) {
+			node.innerHTML = s.toLocaleString() + " samples ";
 		});
+	}
+
+	xenaQuery.datasetField(host, name).subscribe(function(probes) {
+		if (node2) {
+			node2.innerHTML = probes.length.toLocaleString() + " identifiers ";
+		}
+		sectionNode.replaceChild(spaceHolderNode, oldNode);
+
+		tmpNode = domHelper.elt("a", "Show More Data");
+		tmpNode.setAttribute("class", "textLink");
+		addMoreDataLink(dataset, probes.length, tmpNode);
+		spaceHolderNode.appendChild(tmpNode);
+
+		tmpNode = domHelper.elt("a", "All Identifiers");
+		tmpNode.setAttribute("class", "textLink");
+		addAllIdLink(dataset, tmpNode);
+		spaceHolderNode.appendChild(tmpNode);
+
+		tmpNode = domHelper.elt("a", "All Samples");
+		tmpNode.setAttribute("class", "textLink");
+		addAllSampleLink(dataset, tmpNode);
+		spaceHolderNode.appendChild(tmpNode);
 	});
 
 	tmpNode = domHelper.tableCreate(11, 11);
