@@ -1451,21 +1451,30 @@ module.exports = (baseNode, state, callback, xQ) => {
 		keys = Object.keys(queryString),
 		host = queryString.host,
 		hub = queryString.hub,
-		dataset = decodeURIComponent(queryString.dataset),
-		cohort = decodeURIComponent(queryString.cohort),
-		sample = decodeURIComponent(queryString.sample),
-		label = decodeURIComponent(queryString.label),
+		dataset = queryString.dataset && decodeURIComponent(queryString.dataset),
+		cohort = queryString.cohort && decodeURIComponent(queryString.cohort),
+		sample = queryString.sample && decodeURIComponent(queryString.sample),
+		label = queryString.label && decodeURIComponent(queryString.label),
 		nSamples = Number(queryString.nSamples),
 		nProbes = Number(queryString.nProbes),
 		allIdentifiers = queryString.allIdentifiers,
 		allSamples = queryString.allSamples;
 
+
+	// add host or hub if it is not in default lists
+	if (host || hub) {
+		host = hub ? hub : host;
+		if (!_.has(allHosts, host)) {
+			allHosts[host] = {'user': true};
+			state = allHosts;
+			session.setState(state);
+			session.activeHosts.add(host);
+		}
+	}
+
 	// ?host=id
 	if ( keys.length === 1 && (host || hub) ) {
 		host = hub ? hub : host;
-		if (!_.has(allHosts, host)) {
-			return;
-		}
 		hostPage (baseNode, host);
 	}
 
@@ -1504,7 +1513,7 @@ module.exports = (baseNode, state, callback, xQ) => {
 	}
 
 	// ?cohort=id
-	else if (keys.length === 1 && cohort) {
+	else if ((keys.length === 1 && cohort) || (keys.length === 2 && cohort && (host || hub))) {
 		container = domHelper.elt("div");
 		container.setAttribute("id", "content-container");
 
