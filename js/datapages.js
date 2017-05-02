@@ -445,11 +445,60 @@ function cohortPage(cohortName, hosts, rootNode) {
 	});
 }
 
-function downloadLink(dataset) {
+function downloadDataButtonUpdate(dataset, button) {
 	var name = JSON.parse(dataset.dsID).name,
-		host = JSON.parse(dataset.dsID).host;
+		host = JSON.parse(dataset.dsID).host,
+		link = host + "/download/" + name ;
 
-	return host + "/download/" + name;
+	Rx.Observable.ajax({url: link, crossDomain: true, method: 'HEAD'}).subscribe(
+		function(resp) {
+			if (resp.status === 200) {
+				button.addEventListener("click", function() {
+					location.href = link;
+				});
+			}
+		},
+		function () {
+			link = link + ".gz";
+			Rx.Observable.ajax({url: link, crossDomain: true, method: 'HEAD'}).subscribe(
+				function () {
+					button.addEventListener("click", function() {
+						location.href = link;
+					});
+				},
+				function () {
+					button.parentNode.replaceChild(document.createElement("div"), button);
+				}
+			);
+		}
+	);
+}
+
+function downloadLinkUpdate(dataset, downloadNode) {
+	var name = JSON.parse(dataset.dsID).name,
+		host = JSON.parse(dataset.dsID).host,
+		link = host + "/download/" + name ;
+
+	Rx.Observable.ajax({url: link, crossDomain: true, method: 'HEAD'}).subscribe(
+		function(resp) {
+			if (resp.status === 200) {
+				downloadNode.parentNode.replaceChild(domHelper.hrefLink(link, link), downloadNode);
+			}
+		},
+		function () {
+			link = link + ".gz";
+			Rx.Observable.ajax({url: link, crossDomain: true, method: 'HEAD'}).subscribe(
+				function (resp) {
+					if (resp.status === 200) {
+						downloadNode.parentNode.replaceChild(domHelper.hrefLink(link, link), downloadNode);
+					}
+				},
+				function () {
+					downloadNode.parentNode.replaceChild(document.createTextNode('no download'), downloadNode);
+				}
+			);
+		}
+	);
 }
 
 function metaDataLink(dataset) {
@@ -741,7 +790,8 @@ function datasetPage(dataset, host, baseNode) {
 		loaderWarning = dataset.loader,
 		probeMap = dataset.probeMap,
 		goodStatus = session.GOODSTATUS,
-		nodeTitle, vizbuttonParent, hostNode, tmpNode;
+		nodeTitle, vizbuttonParent, hostNode, downloadNode,
+		tmpNode;
 
 
 	if (description) {
@@ -825,14 +875,14 @@ function datasetPage(dataset, host, baseNode) {
 
 	// Downlaod
 	sectionNode.appendChild(domHelper.elt("labelsameLength", "download"));
-	link = downloadLink (dataset);
+	downloadNode = document.createElement("div");
 	metalink = metaDataLink (dataset);
 
 	sectionNode.appendChild(domHelper.elt("resultsameLength",
-		domHelper.hrefLink(link, link),
+		downloadNode,
 		document.createTextNode("; "),
 		domHelper.hrefLink("Full metadata", metalink)));
-
+	downloadLinkUpdate(dataset, downloadNode);
 	sectionNode.appendChild(domHelper.elt("br"));
 
 	// samples: n
@@ -1121,9 +1171,6 @@ function downloadDataButton (dataset) {
 		var button = document.createElement("BUTTON");
 		button.setAttribute("class", "vizbutton");
 		button.appendChild(document.createTextNode("Download"));
-		button.addEventListener("click", function() {
-			location.href = downloadLink(dataset);
-	  });
 	  return button;
 	}
 }
@@ -1144,6 +1191,7 @@ function datasetSideBar(dataset, sideNode) {
 		sideNode.appendChild(button);
 		sideNode.appendChild(document.createElement("br"));
 	}
+	downloadDataButtonUpdate(dataset, button);
 
 	// delete button
 	button = deleteDataButton (dataset);
