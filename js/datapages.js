@@ -636,12 +636,10 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 		xenaQuery.datasetSamplesExamples(host, name, nSamples).subscribe(
 			function (samples) {
 				var query = xenaQuery.datasetFieldExamples(host, name, nProbes);
-
 				query.subscribe(function (probes) {
 					probes = probes.map(function (probe) {
 						return probe.name;
 					});
-
 					xenaQuery.fieldCodes(host, name, probes).subscribe(function(codemap) {
 						//return probes by all_samples
 						var row, column,
@@ -649,7 +647,7 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 							i, j,
 							firstRow, firstCol;
 
-						xenaQuery.datasetProbeValues(host, name, samples, probes).subscribe( function (s) {
+						xenaQuery.datasetProbeValues(host, name, samples, probes).subscribe( function (matrix) {
 							if (type === "genomicMatrix") {
 								firstCol = probes;
 								firstRow = samples;
@@ -684,12 +682,12 @@ function dataSnippets (dataset, nSamples, nProbes, node) {
 							}
 
 							//data cell
-							for(i = 1; i < s[1].length + 1; i++) {
+							for(i = 1; i < matrix[1].length + 1; i++) {
 								var probe = probes[i - 1],
 									value, code;
 
 								for (j = 1; j < samples.length + 1; j++) {
-									value = s[1][i - 1][j - 1];
+									value = matrix[1][i - 1][j - 1];
 									code = undefined;
 									if (codemap[probe]) {
 										if(!isNaN(value)) {
