@@ -17,7 +17,7 @@ defaultNames[defaultTCGA] = "TCGA hub";
 defaultNames[defaultICGC] = "ICGC hub";
 defaultNames[defaultTOIL] = "GA4GH-BD2K (TOIL) hub";
 defaultNames[defaultPCAWG] = "PCAWG public hub";
-defaultNames[defaultSinglecell] = "Single cell hub";
+defaultNames[defaultSinglecell] = "Single-cell RNAseq hub";
 
 var xenaState;
 var activeHosts = new Set();
