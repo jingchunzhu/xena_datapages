@@ -6,7 +6,7 @@ var controller = require("./controller");
 
 
 var {defaultLocal, defaultUCSC, defaultTCGA, defaultICGC, defaultTOIL,
-	defaultPCAWG} = require('./defaults');
+	defaultPCAWG, defaultSinglecell} = require('./defaults');
 
 var defaultNames = {},
 	GOODSTATUS = "loaded";
@@ -17,6 +17,7 @@ defaultNames[defaultTCGA] = "TCGA hub";
 defaultNames[defaultICGC] = "ICGC hub";
 defaultNames[defaultTOIL] = "GA4GH-BD2K (TOIL) hub";
 defaultNames[defaultPCAWG] = "PCAWG public hub";
+defaultNames[defaultSinglecell] = "Single cell hub";
 
 var xenaState;
 var activeHosts = new Set();

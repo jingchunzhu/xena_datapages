@@ -1,12 +1,12 @@
 'use strict';
 
 var defaultLocal = "https://local.xena.ucsc.edu:7223",
-	//defaultUCSC = "https://genome-cancer.ucsc.edu:443/proj/public/xena",
 	defaultUCSC = "https://ucscpublic.xenahubs.net",
 	defaultTCGA = "https://tcga.xenahubs.net",
 	defaultICGC = "https://icgc.xenahubs.net",
 	defaultTOIL = "https://toil.xenahubs.net",
 	defaultPCAWG = "https://pcawg.xenahubs.net",
+	defaultSinglecell = "https://singlecell.xenahubs.net",
 
 	defaultAllHubs = [
 		defaultLocal,
@@ -39,5 +39,6 @@ module.exports = {
 	defaultTCGA,
 	defaultICGC,
 	defaultTOIL,
-	defaultPCAWG
+	defaultPCAWG,
+	defaultSinglecell,
 };
