@@ -30,9 +30,10 @@ var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if
 		'genomicSegment': 'Genomic Segment (i.e. genomicSegment)',
 		'unknown': "unknown"
 	},
+	denseMatrixType = ['genomicMatrix', 'clinicalMatrix'],
 	treehouseImg = require('../images/Treehouse.jpg'),
 	infoImgSource = require('../images/Info.png'),
-	denseMatrixType = ['genomicMatrix', 'clinicalMatrix'];
+	cohortMetaDataSource = "https://raw.githubusercontent.com/ucscXena/cohortMetaData/master/";
 
 function datasetList(servers, cohort) {
 	return Rx.Observable.zipArray(
@@ -218,6 +219,21 @@ function buildTreeHouseImage (cohortName) {
 	return img;
 }
 
+//testing your markdowns http://showdownjs.github.io/demo/
+function renderMarkDownFile(file, node)
+{
+	Rx.Observable.ajax({url: file, crossDomain: true, method: 'GET', responseType: 'text'}).subscribe(function(resp) {
+		var converter = new showdown.Converter();
+		node.innerHTML = converter.makeHtml(resp.response);
+		node.appendChild(document.createElement("br"));
+	});
+}
+
+function buildCohortMetaDataLink(cohortName)
+{
+	return cohortMetaDataSource + "cohort_" + cohortName + "/info.mdown";
+}
+
 // the short COHORT section with no detail, just name, vizbutton (if valid), img (optional)
 function eachCohortMultiple(cohortName, hosts, node) {
 	var liNode = document.createElement("li"),
@@ -330,6 +346,12 @@ function cohortPage(cohortName, hosts, rootNode) {
 	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent);
 
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
+		//cohort markdown
+		var mdFile = buildCohortMetaDataLink(cohortName),
+			markdownNode = domHelper.sectionNode("dataType");
+		rootNode.appendChild(markdownNode);
+		renderMarkDownFile(mdFile, markdownNode);
+		console.log(mdFile);
 		//dataset list
 		datasetList(hosts, cohortName).subscribe(
 			function (s) {
@@ -1440,16 +1462,6 @@ function frontPage (baseNode) {
 	//the end
 	container.appendChild(domHelper.elt("br"));
 	baseNode.appendChild(container);
-}
-
-//testing your markdowns http://showdownjs.github.io/demo/
-function renderMarkDownFile(file, node)
-{
-	Rx.Observable.ajax({url: file, crossDomain: true, method: 'GET', responseType: 'text'}).subscribe(function(resp) {
-		var converter = new showdown.Converter();
-		node.innerHTML = converter.makeHtml(resp.response);
-		node.appendChild(document.createElement("br"));
-	});
 }
 
 function hostPage (baseNode, host) {
