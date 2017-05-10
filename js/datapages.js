@@ -334,6 +334,13 @@ function cohortPage(cohortName, hosts, rootNode) {
 
 	rootNode.appendChild(node);
 
+	//cohort markdown
+	var mdFile = buildCohortMetaDataLink(cohortName),
+		markdownNode = document.createElement("div");
+	renderMarkDownFile(mdFile, markdownNode);
+	markdownNode.style.padding = "0px 100px 0px 0px";
+	node.appendChild(markdownNode);
+
 	//title
 	vizbuttonParent = domHelper.elt("h2", "cohort: ");
 	node.appendChild(vizbuttonParent);
@@ -344,13 +351,6 @@ function cohortPage(cohortName, hosts, rootNode) {
 	}
 	vizbuttonParent.appendChild(document.createTextNode(cohortName));
 	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent);
-
-	//cohort markdown
-	var mdFile = buildCohortMetaDataLink(cohortName),
-		markdownNode = document.createElement("div");
-	renderMarkDownFile(mdFile, markdownNode);
-	markdownNode.style.padding = "0px 100px 0px 0px";
-	node.appendChild(markdownNode);
 
 
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
