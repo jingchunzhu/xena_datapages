@@ -33,7 +33,7 @@ var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if
 	denseMatrixType = ['genomicMatrix', 'clinicalMatrix'],
 	treehouseImg = require('../images/Treehouse.jpg'),
 	infoImgSource = require('../images/Info.png'),
-	cohortMetaDataSource = "https://raw.githubusercontent.com/ucscXena/cohortMetaData/master/";
+	cohortMetaDataSource = "https://rawgit.com/ucscXena/cohortMetaData/master/";
 
 function datasetList(servers, cohort) {
 	return Rx.Observable.zipArray(
@@ -231,6 +231,7 @@ function renderMarkDownFile(file, node)
 
 function buildCohortMetaDataLink(cohortName)
 {
+	cohortName = cohortName.replace("(", "-").replace(")", "");
 	return cohortMetaDataSource + "cohort_" + cohortName + "/info.mdown";
 }
 
@@ -286,9 +287,6 @@ function cohortListPage(hosts, rootNode) {
 		return;
 	}
 
-	var node = document.createElement("div");
-	node.setAttribute("id", "cohortList");
-
 	var source = Rx.Observable.zipArray(
 		hosts.map(function (host) {
 			return xenaQuery.allCohorts(host).catch(() => Rx.Observable.of([]));
@@ -305,6 +303,8 @@ function cohortListPage(hosts, rootNode) {
 			});
 
 		rootNode.appendChild(domHelper.elt("h2", cohortC.filter(cohortName => cohortName !== COHORT_NULL).length + " Cohorts"));
+		var node = document.createElement("div");
+		node.setAttribute("id", "cohortList");
 		rootNode.appendChild(node);
 
 		cohortC.sort(function (a, b) {
@@ -345,13 +345,15 @@ function cohortPage(cohortName, hosts, rootNode) {
 	vizbuttonParent.appendChild(document.createTextNode(cohortName));
 	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent);
 
+	//cohort markdown
+	var mdFile = buildCohortMetaDataLink(cohortName),
+		markdownNode = document.createElement("div");
+	renderMarkDownFile(mdFile, markdownNode);
+	markdownNode.style.padding = "0px 100px 0px 0px";
+	node.appendChild(markdownNode);
+
+
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
-		//cohort markdown
-		var mdFile = buildCohortMetaDataLink(cohortName),
-			markdownNode = domHelper.sectionNode("dataType");
-		rootNode.appendChild(markdownNode);
-		renderMarkDownFile(mdFile, markdownNode);
-		console.log(mdFile);
 		//dataset list
 		datasetList(hosts, cohortName).subscribe(
 			function (s) {
