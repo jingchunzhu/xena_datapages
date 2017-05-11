@@ -144,6 +144,23 @@ function cohortHeatmapButton(cohort, hosts, vizbuttonParent) {
 	});
 }
 
+function cohortVizButtonBootstrap(cohort, hosts, vizbuttonParent) {
+	var vizbutton,
+		goodStatus = session.GOODSTATUS;
+
+	ifCohortExistDo(cohort, hosts, goodStatus, function() {
+		vizbutton = document.createElement("input");
+		vizbutton.type = "button";
+		vizbutton.className = "btn btn-primary";
+		vizbutton.value = "Visualize";
+		vizbutton.addEventListener("click", function() {
+			session.xenaHeatmapSetCohort(cohort);
+			location.href = "../heatmap/";
+		});
+		vizbuttonParent.appendChild(vizbutton);
+	});
+}
+
 function configHubButton () {
 	var button = document.createElement("BUTTON");
 	button.setAttribute("class", "vizbutton");
@@ -349,8 +366,8 @@ function cohortPage(cohortName, hosts, rootNode) {
 		if (img) {
 			vizbuttonParent.appendChild(img);
 	}
-	vizbuttonParent.appendChild(document.createTextNode(cohortName));
-	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent);
+	vizbuttonParent.appendChild(document.createTextNode(cohortName + ' '));
+	cohortVizButtonBootstrap(cohortName, userActiveHosts(), vizbuttonParent);
 
 
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
@@ -855,12 +872,14 @@ function datasetPage(dataset, host, baseNode) {
 	// cohort:xxx
 	sectionNode.appendChild(domHelper.elt("labelsameLength", "cohort"));
 	nodeTitle = domHelper.hrefLink(cohort, "?cohort=" + encodeURIComponent(cohort));
-	vizbuttonParent = domHelper.elt("multiple", nodeTitle);
+	vizbuttonParent = document.createElement("div");
+	vizbuttonParent.appendChild(nodeTitle);
+	vizbuttonParent.appendChild(document.createTextNode(' '));
 	sectionNode.appendChild(domHelper.elt("resultsameLength", vizbuttonParent));
 
 	// viz button
 	if (status === goodStatus) {
-		cohortHeatmapButton(cohort, userActiveHosts([host]), vizbuttonParent);
+		cohortVizButtonBootstrap(cohort, userActiveHosts([host]), vizbuttonParent);
 	}
 	sectionNode.appendChild(domHelper.elt("br"));
 
