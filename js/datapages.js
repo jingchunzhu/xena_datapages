@@ -829,7 +829,7 @@ function datasetPage(dataset, host, baseNode) {
 		loaderWarning = dataset.loader,
 		probeMap = dataset.probeMap,
 		goodStatus = session.GOODSTATUS,
-		nodeTitle, vizbuttonParent, hostNode, downloadNode,
+		nodeTitle, hostNode, downloadNode,
 		tmpNode;
 
 
@@ -872,15 +872,7 @@ function datasetPage(dataset, host, baseNode) {
 	// cohort:xxx
 	sectionNode.appendChild(domHelper.elt("labelsameLength", "cohort"));
 	nodeTitle = domHelper.hrefLink(cohort, "?cohort=" + encodeURIComponent(cohort));
-	vizbuttonParent = document.createElement("div");
-	vizbuttonParent.appendChild(nodeTitle);
-	vizbuttonParent.appendChild(document.createTextNode(' '));
-	sectionNode.appendChild(domHelper.elt("resultsameLength", vizbuttonParent));
-
-	// viz button
-	if (status === goodStatus) {
-		cohortVizButtonBootstrap(cohort, userActiveHosts([host]), vizbuttonParent);
-	}
+	sectionNode.appendChild(domHelper.elt("resultsameLength", nodeTitle));
 	sectionNode.appendChild(domHelper.elt("br"));
 
 	// ID
