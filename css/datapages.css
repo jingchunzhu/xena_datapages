@@ -10,22 +10,6 @@ background-color:#ffffff;
 list-style:none;
 }
 
-#main a:hover
-{
-color:#ff6600;
-}
-
-#main .tb5 {
-  border-radius: 5px;
-	border:1px solid #456879;
-	height: 30px;
-	width: 400px;
-	padding: 2px 10px;
-	font-size: 16px;
-	margin-bottom: 10px;
-	color:gray;
-}
-
 #main .searchBox {
   border-radius: 5px;
   border:1px solid gray;
@@ -137,14 +121,6 @@ margin-right: 15px;
 width: 20%;
 }
 
-#leftsidebar {
-float:left;
-position:fixed;
-margin-top: 20px;
-margin-left: 10px;
-width: 10%;
-}
-
 #dataPagesMain {
 width:80%;
 }
@@ -161,12 +137,6 @@ width: 80%;
 margin-left: auto;
 margin-right: auto;
 width: 60%;
-}
-
-img[alt="DAG_Image"]
-{
-  max-width: 50%;
-  display: block;
 }
 
 #cohortList a
@@ -224,33 +194,6 @@ background: linear-gradient(#ddd, #f5f5f5);
 
 .vizbutton:disabled{
   color:gray;
-}
-
-.hubcheck {
-  height: 20px;
-  width: 20px;
-  border-radius: 10px;
-  border:1px solid gray;
-  vertical-align: middle;
-  -moz-appearance:none;
-  -webkit-appearance:none;
-  -o-appearance:none;
-}
-
-.hubcheck:checked {
-background: linear-gradient(gray, white);
-}
-
-.hubcheck:focus {
-outline: 0;
-}
-
-#main .hubcheck + label
-{
-display: inline-block;
-margin-left: 15px;
-width:100px;
-font-weight: normal;
 }
 
 .dataSnippetTable
