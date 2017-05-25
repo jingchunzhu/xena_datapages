@@ -192,10 +192,6 @@ background: linear-gradient(#ddd, #f5f5f5);
   color:#ff6600;
 }
 
-.vizbutton:disabled{
-  color:gray;
-}
-
 .dataSnippetTable
 {
 border-collapse:collapse;

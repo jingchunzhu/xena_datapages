@@ -1488,8 +1488,9 @@ function hostPage (baseNode, host) {
 	// hub basic info and hub configuration button
 	var node = document.createElement("div"),
 		hostLabel = session.getHubName(host),
-		tmpNode = domHelper.hrefLink(hostLabel + " (connecting)", "../datapages/?host=" + host);
+		tmpNode = document.createElement("div");
 
+	tmpNode.innerhtml = hostLabel + " (connecting)";
 	node.setAttribute("class", "hubinfo");
 	tmpNode.setAttribute("id", "status" + host);
 	node.appendChild(domHelper.elt("h2", tmpNode, configHubButton() ));

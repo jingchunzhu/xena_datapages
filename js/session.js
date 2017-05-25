@@ -67,8 +67,7 @@ function updateHostDOM(host, status) {
 
 	if (node) {
 		node.parentNode.replaceChild(
-			domHelper.elt(display[status].el, domHelper.hrefLink(shortLabel + display[status].msg,
-				"../datapages/?host=" + host)), node);
+			domHelper.elt(display[status].el, shortLabel + display[status].msg), node);
 	}
 	if (sidebarNode && (status === "dead" || status === "slow")) {
 		sidebarNode.parentNode.removeChild(sidebarNode);
