@@ -35,6 +35,8 @@ var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if
 	infoImgSource = require('../images/Info.png'),
 	cohortMetaDataSource = "https://rawgit.com/ucscXena/cohortMetaData/master/";
 
+const MAX_SAMPLES = 1000 * 1000;
+
 function datasetList(servers, cohort) {
 	return Rx.Observable.zipArray(
 			_.map(servers, server => xenaQuery.datasetList(server, [cohort])
@@ -438,7 +440,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 						if (dataset.status === session.GOODSTATUS ) { // good data, with or without warning
 							datasetNode.appendChild(domHelper.valueNode(fullname + "sampleN"));
 							if (denseMatrixType.indexOf(dataset.type) === -1) {
-								xenaQuery.datasetSamples(dataset.host, dataset.name).subscribe(function (s) {
+								xenaQuery.datasetSamples(dataset.host, dataset.name, MAX_SAMPLES).subscribe(function (s) {
 									document.getElementById(fullname + "sampleN").
 									appendChild(domHelper.elt("label", document.createTextNode(" (n=" + s.length.toLocaleString() + ")")));
 								});
@@ -550,16 +552,15 @@ function metaDataLink(dataset) {
 }
 
 function updataDOMXenaDataSetSampleN(DOM_ID, host, dataset) {
-	var tag = "result";
 	if (denseMatrixType.indexOf(dataset.type) === -1) {
-		xenaQuery.datasetSamples(host, dataset.name).subscribe(function (s) {
+		xenaQuery.datasetSamples(host, dataset.name, MAX_SAMPLES).subscribe(function (s) {
 			var node = document.getElementById(DOM_ID);
-			node.parentNode.replaceChild(domHelper.elt(tag, (s.length.toLocaleString())), node);
+			node.parentNode.replaceChild(document.createTextNode(s.length.toLocaleString()), node);
 		});
 	} else {
 		xenaQuery.datasetSamplesNDenseMatrix(host, dataset.name).subscribe(function (s) {
 			var node = document.getElementById(DOM_ID);
-			node.parentNode.replaceChild(domHelper.elt(tag, (s.toLocaleString())), node);
+			node.parentNode.replaceChild(document.createTextNode(s.toLocaleString()), node);
 		});
 	}
 }
@@ -1142,7 +1143,7 @@ function allSamplesPage (host, dataset, label) {
 	rootNode.appendChild(textNode);
 
 	text = "Samples\n";
-	xenaQuery.datasetSamples(host, dataset).subscribe(function(samples) {
+	xenaQuery.datasetSamples(host, dataset, MAX_SAMPLES).subscribe(function(samples) {
 		samples.forEach(function(sample) {
 			text = text + sample + "\n";
 		});
@@ -1159,7 +1160,7 @@ function samplePage(baseNode, sample, cohort) {
 	sectionNode.appendChild(domHelper.elt("h2", "sample: " + sample));
 	sectionNode.appendChild(document.createElement("br"));
 	sectionNode.appendChild(domHelper.elt("label", "cohort:"));
-	sectionNode.appendChild(domHelper.elt("result", domHelper.hrefLink(cohort, "?&cohort=" + cohort)));
+	sectionNode.appendChild(domHelper.hrefLink(cohort, "?&cohort=" + cohort));
 
 	baseNode.appendChild(sectionNode);
 }
