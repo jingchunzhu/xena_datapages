@@ -1504,6 +1504,10 @@ function hostPage (baseNode, host) {
 	baseNode.appendChild(node);
 }
 
+/*function hostNormalize(host) {
+	return host.replace(/.xenahubs.net:443$/, ".xenahubs.net");
+}*/
+
 var initialized = false;
 module.exports = (baseNode, state, callback, xQ) => {
 	session.setCallback(callback);
@@ -1533,10 +1537,10 @@ module.exports = (baseNode, state, callback, xQ) => {
 		allIdentifiers = queryString.allIdentifiers,
 		allSamples = queryString.allSamples;
 
-
 	// add host or hub if it is not in default lists
 	if (host || hub) {
 		host = hub ? hub : host;
+		//host = hostNormalize(host);
 		if (!_.has(allHosts, host)) {
 			allHosts[host] = {'user': true};
 			state = allHosts;

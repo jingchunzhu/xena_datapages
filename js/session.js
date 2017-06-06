@@ -5,20 +5,9 @@ var domHelper = require("./dom_helper");
 var controller = require("./controller");
 
 
-var {defaultLocal, defaultUCSC, defaultTCGA, defaultICGC, defaultTOIL,
-	defaultPCAWG, defaultSinglecell} = require('./defaults');
+var {defaultNames} = require('./defaults');
 
-var defaultNames = {},
-	GOODSTATUS = "loaded";
-
-defaultNames[defaultLocal] = "My computer hub";
-defaultNames[defaultUCSC] = "UCSC public hub";
-defaultNames[defaultTCGA] = "TCGA hub";
-defaultNames[defaultICGC] = "ICGC hub";
-defaultNames[defaultTOIL] = "GA4GH-BD2K (TOIL) hub";
-defaultNames[defaultPCAWG] = "PCAWG public hub";
-defaultNames[defaultSinglecell] = "Single-cell RNAseq hub";
-
+var GOODSTATUS = "loaded";
 var xenaState;
 var activeHosts = new Set();
 
