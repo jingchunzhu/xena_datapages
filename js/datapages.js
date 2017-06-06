@@ -1504,9 +1504,9 @@ function hostPage (baseNode, host) {
 	baseNode.appendChild(node);
 }
 
-/*function hostNormalize(host) {
+function ucscHostNormalize(host) {
 	return host.replace(/.xenahubs.net:443$/, ".xenahubs.net");
-}*/
+}
 
 var initialized = false;
 module.exports = (baseNode, state, callback, xQ) => {
@@ -1540,7 +1540,8 @@ module.exports = (baseNode, state, callback, xQ) => {
 	// add host or hub if it is not in default lists
 	if (host || hub) {
 		host = hub ? hub : host;
-		//host = hostNormalize(host);
+		host = ucscHostNormalize(host);
+		hub = host;
 		if (!_.has(allHosts, host)) {
 			allHosts[host] = {'user': true};
 			state = allHosts;
