@@ -9,7 +9,6 @@ var session = require("./session");
 var _ = require("underscore");
 var Rx = require("./rx");
 var xenaAdmin = require("./xenaAdmin");
-var lunr = require("lunr");
 var {defaultLocal} = require('./defaults');
 
 require("../css/datapages.css");
@@ -1256,198 +1255,9 @@ function bigDataSnippetPage (host, dataset, nSamples, nProbes) {
 	);
 }
 
-function xenaTextValuesToString (dataset) {
-	delete dataset.loader;
-	return JSON.stringify(dataset);
-}
-
-function buildIndex (idxObj, hosts) {
-	var idx = lunr(function () {
-			this.field('cohort');
-			this.field('body');
-		}),
-		store = {},
-		i = 0,
-		doc;
-
-	var source = Rx.Observable.zipArray(
-	  hosts.map(function (host) {
-		return xenaQuery.allDatasets(host).catch(() => Rx.Observable.of([]));
-	  })
-	);
-
-	function addToIndex(host, dataset) {
-		var body = xenaTextValuesToString(dataset),
-			type = dataset.type,
-			status = dataset.status;
-
-		if (NOT_GENOMICS.indexOf(type) === 1) {
-			return;
-		}
-		if (status !== session.GOODSTATUS) {
-			return;
-		}
-
-		i = i + 1;
-		doc = {
-			"cohort": dataset.cohort,
-			"body": body,
-			"id": i
-		};
-		idx.add(doc);
-		store[i] = {
-			"name": dataset.name,
-			"label": dataset.label,
-			"cohort": dataset.cohort,
-			"host": host
-		};
-	};
-
-	source.subscribe(function (hostReturn) {
-		hostReturn.forEach(function(s, i) {
-			s.forEach(function (dataset) {
-				addToIndex(hosts[i], dataset);
-			});
-		});
-		idxObj.index = idx;
-		idxObj.store = store;
-	});
-}
-
 //the front page of dataPages
 function frontPage (baseNode) {
-	var indxObj = {},
-		inputBox = document.createElement("INPUT"),
-		searchButton = document.createElement("BUTTON"),
-		resetButton = document.createElement("BUTTON"),
-		container, sideNode, mainNode, searchNode, cohortNode;
-
-	function doSearch(query) {
-		var cohort, url,
-			cohortList = [], datasetList = [],
-			idx, store,
-			timer;
-
-		function displaySearchResult() {
-			var results,
-				array;
-
-			results = idx.search(query);
-			results.map(function (obj) {
-				cohort = store[obj.ref].cohort;
-				datasetList.push(store[obj.ref]);
-				if (cohortList.indexOf(cohort) === -1) {
-					cohortList.push(cohort);
-				}
-			});
-
-		cohortNode.innerHTML = "";
-
-		if (cohortList.length === 0) {
-			cohortNode.appendChild(document.createTextNode("Your search - "));
-			cohortNode.appendChild(domHelper.elt("I", query));
-			cohortNode.appendChild(document.createTextNode(" - did not find any data."));
-		}
-		else {
-			var text = "Found approx ",
-				message,
-				clearnArray;
-
-			array = [(cohortList.length ? (cohortList.length.toLocaleString()  + " cohort" +  (cohortList.length > 1 ? "s" : "")) : ""),
-				(datasetList.length ? (datasetList.length.toLocaleString() + " dataset" + (datasetList.length > 1 ? "s" : "")) : "")];
-
-			clearnArray = array.filter(function (phrase) {
-					return (phrase !== "");
-				});
-
-			var arrayText = clearnArray.slice(0, clearnArray.length - 1).join(', ');
-			arrayText = (arrayText ? (arrayText + " and ") : "") + clearnArray[clearnArray.length - 1];
-			text = text + arrayText;
-				message = domHelper.elt("span", text);
-				message.style.color = "gray";
-			cohortNode.appendChild(message);
-		}
-		if (cohortList.length > 0) {
-				cohortNode.appendChild(domHelper.elt("h2", array[0]));
-				cohortList.forEach(function(cohort) {
-					url = "?cohort=" + encodeURIComponent(cohort);
-				cohortNode.appendChild(domHelper.hrefLink(cohort, url));
-				cohortNode.appendChild(document.createElement("br"));
-				});
-		  }
-		  if (datasetList.length > 0) {
-			cohortNode.appendChild(domHelper.elt("h2", array[1]));
-			datasetList.forEach(function(obj) {
-				url = "?dataset=" + encodeURIComponent(obj.name) + "&host=" + encodeURIComponent(obj.host);
-				cohortNode.appendChild(document.createTextNode(obj.cohort + " : "));
-				cohortNode.appendChild(domHelper.hrefLink(obj.label, url));
-				cohortNode.appendChild(document.createElement("br"));
-			});
-		  }
-
-		  cohortNode.appendChild(document.createElement("br"));
-			inputBox.disabled = false;
-			searchButton.disabled = false;
-			resetButton.disabled = false;
-		}
-
-		inputBox.disabled = true;
-		searchButton.disabled = true;
-		resetButton.disabled = true;
-
-		cohortNode.innerHTML = ""; //clear cohortList
-		if (query === "") {  // all cohorts
-			cohortListPage(userActiveHosts(), cohortNode);
-			inputBox.disabled = false;
-			searchButton.disabled = false;
-			resetButton.disabled = false;
-			return;
-		}
-
-		var spinner = domHelper.loadingCircle();
-		cohortNode.appendChild(spinner);
-
-		if (!indxObj.index) {
-			buildIndex (indxObj, userActiveHosts());
-		}
-
-		timer = setInterval(function() {
-			if (!indxObj.index) {
-				return;
-			}
-			store = indxObj.store;
-			idx = indxObj.index;
-			displaySearchResult();
-			clearInterval(timer);
-		}, 50);
-	}
-
-	function searchUI(sectionNode) {
-		var query;
-
-		inputBox.setAttribute("class", "searchBox");
-		inputBox.setAttribute("id", "dataPageQuery");
-		sectionNode.appendChild(inputBox);
-
-		searchButton.setAttribute("class", "vizbutton");
-		searchButton.appendChild(document.createTextNode("Search Cohorts"));
-		sectionNode.appendChild(searchButton);
-
-		searchButton.addEventListener("click", function () {
-			query = document.getElementById("dataPageQuery").value.trim();
-			doSearch(query);
-		});
-
-		resetButton.setAttribute("class", "vizbutton");
-		resetButton.appendChild(document.createTextNode("Reset"));
-		sectionNode.appendChild(resetButton);
-
-		resetButton.addEventListener("click", function () {
-			document.getElementById("dataPageQuery").value = "";
-			cohortNode.innerHTML = "";
-			cohortListPage(userActiveHosts(), cohortNode);
-		});
-	}
+	var	container, sideNode, mainNode, cohortNode;
 
 	//overall container
 	container = domHelper.elt("div");
@@ -1460,11 +1270,6 @@ function frontPage (baseNode) {
 	//main section cohort list page
 	mainNode = domHelper.elt("div");
 	mainNode.setAttribute("id", "dataPagesMain");
-
-	//search node
-	searchNode = domHelper.sectionNode("cohort");
-	searchUI(searchNode);
-	mainNode.appendChild(searchNode);
 
 	cohortNode = domHelper.sectionNode("cohort");
 	mainNode.appendChild(cohortNode);

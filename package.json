@@ -64,7 +64,6 @@
     "ehmutable": "^1.1.0"
   },
   "dependencies": {
-    "lunr": "0.5.7",
     "showdown": "1.3.0"
   },
   "directories": {
