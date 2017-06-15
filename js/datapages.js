@@ -293,17 +293,26 @@ function eachCohortMultiple(cohortName, hosts, node) {
 	node.appendChild(liNode);
 
 	//remove extra
-	if (cohortName === COHORT_NULL) {
-		ifCohortDoesNotExistDo(cohortName, hosts, session.GOODSTATUS, function () {
-			node.removeChild(liNode);
-		});
-	}
+	ifCohortDoesNotExistDo(cohortName, hosts, session.GOODSTATUS, function () {
+		node.removeChild(liNode);
+	});
 }
 
 function cohortListPage(hosts, rootNode) {
 	if (!hosts || hosts.length <= 0) {
 		return;
 	}
+	// number of cohorts and datasets
+	var totalDatasets = document.createElement("span"),
+		totalCohorts = document.createElement("span");
+
+	totalDatasets.setAttribute("id", "totalDatasetsN");
+	totalCohorts.setAttribute("id", "totalCohortsN");
+
+	rootNode.appendChild(domHelper.elt("h2",
+		totalCohorts, " Cohorts, ",
+		totalDatasets, " Datasets"
+	));
 
 	var source = Rx.Observable.zipArray(
 		hosts.map(function (host) {
@@ -313,21 +322,14 @@ function cohortListPage(hosts, rootNode) {
 
 	source.subscribe(function (x) {
 		var cohortC = [];
-
 		_.flatten(x).forEach(function(cohort) {
 			if (cohortC.indexOf(cohort) === -1) {
 					cohortC.push(cohort);
 				}
 			});
 
-		// number of cohorts and datasets
-		var totalDatasets = document.createElement("span");
-		totalDatasets.setAttribute("id", "totalDatasetsN");
-		rootNode.appendChild(domHelper.elt("h2",
-			cohortC.filter(cohortName => cohortName !== COHORT_NULL).length + " Cohorts, ",
-			totalDatasets,
-			" Datasets"
-		));
+		document.getElementById("totalCohortsN").innerHTML =
+			cohortC.filter(cohortName => cohortName !== COHORT_NULL).length;
 
 		var node = document.createElement("div");
 		node.setAttribute("id", "cohortList");
@@ -343,13 +345,16 @@ function cohortListPage(hosts, rootNode) {
 			return a.toLowerCase().localeCompare(b.toLowerCase());
 		});
 
-		var totalDatasetsN = 0;
 		cohortC.map(function(cohort) {
 			eachCohortMultiple(cohort, hosts, node);
-			datasetList(hosts, cohort).subscribe(function(hostsList) {
-				totalDatasetsN = totalDatasetsN + _.reduce(hostsList, (memo, l) => {return memo + l.datasets.length;}, 0);
-				document.getElementById("totalDatasetsN").innerHTML = totalDatasetsN;
-			});
+		});
+	});
+
+	var totalDatasetsN = 0;
+	hosts.map(function (host) {
+		xenaQuery.allDatasetsN(host).catch(() => Rx.Observable.of([])).subscribe(s => {
+			totalDatasetsN = totalDatasetsN + s;
+			document.getElementById("totalDatasetsN").innerHTML = totalDatasetsN;
 		});
 	});
 
