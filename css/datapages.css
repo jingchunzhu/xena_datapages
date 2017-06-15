@@ -10,20 +10,6 @@ background-color:#ffffff;
 list-style:none;
 }
 
-#main .searchBox {
-  border-radius: 5px;
-  border:1px solid gray;
-  height: 30px;
-  width: 60%;
-  padding: 2px 10px;
-  font-size: 16px;
-  margin-top: 20px;
-}
-#main .searchBox:disabled {
-  border:1px solid light-gray;
-  color :gray;
-}
-
 #main a:link
 {
 font-weight:normal;
@@ -115,10 +101,6 @@ margin-right: 15px;
 width: 20%;
 }
 
-#dataPagesMain {
-width:80%;
-}
-
 #cohort,#dataType,#dataset,#description,#samples,#host,#hub
 {
 margin-left: auto;
@@ -152,13 +134,6 @@ display: inline-block;
 color:#404040;
 margin-top: 20px;
 margin-bottom: 20px;
-}
-
-#main #cohort h3 a,#dataset h3 a
-{
-margin-top: 20px;
-font-size:1.3em;
-font-weight: bold;
 }
 
 #dataType header,#samples header,#others header
@@ -212,76 +187,3 @@ min-width: 30px;
   text-align: center;
 }
 
-.spinner{
-  width:100px;
-  height:100px;
-  position:relative;
-  -webkit-animation: rotating 2s linear infinite reverse;
-  animation: rotating 2s linear infinite reverse;
-}
-
-@keyframes rotating {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
-}
-
-@-webkit-keyframes rotating {
-  from { -webkit-transform: rotate(360deg); }
-  to { -webkit-transform: rotate(0deg); }
-}
-
-.spinner.circles div{
-  width: 10px;
-  height: 10px;
-  border-radius:50%;
-  background: black;
-  position: absolute;
-  top: 45px;
-  left: 45px;
-}
-.spinner.circles div:nth-child(1){
-  -webkit-transform: rotate(0deg) translate(0, -35px);
-  transform: rotate(0deg) translate(0, -35px);
-}
-.spinner.circles div:nth-child(2){
-  -webkit-transform: rotate(45deg) translate(0, -35px);
-  transform: rotate(45deg) translate(0, -35px);
-  opacity:0.7;
-}
-.spinner.circles div:nth-child(3){
-  -webkit-transform: rotate(90deg) translate(0, -35px) ;
-  transform: rotate(90deg) translate(0, -35px) ;
-  opacity:0.6;
-}
-.spinner.circles div:nth-child(4){
-  -webkit-transform: rotate(135deg) translate(0, -35px) ;
-  transform: rotate(135deg) translate(0, -35px) ;
-  opacity:0.5;
-}
-.spinner.circles div:nth-child(5){
-  -webkit-transform: rotate(180deg) translate(0, -35px) ;
-  transform: rotate(180deg) translate(0, -35px) ;
-  opacity:0.4;
-}
-.spinner.circles div:nth-child(6){
-  -webkit-transform: rotate(225deg) translate(0, -35px) ;
-  transform: rotate(225deg) translate(0, -35px);
-  opacity:0.3;
-}
-.spinner.circles div:nth-child(7){
-  -webkit-transform: rotate(270deg) translate(0, -35px);
-  transform: rotate(270deg) translate(0, -35px);
-  opacity:0.2;
-}
-.spinner.circles div:nth-child(8){
-  -webkit-transform: rotate(315deg) translate(0, -35px);
-  transform: rotate(315deg) translate(0, -35px);
-  opacity:0.1;
-}
-
-.modal-container {
-  position: relative;
-}
-.modal-container .modal, .modal-container .modal-backdrop {
-  position: absolute;
-}

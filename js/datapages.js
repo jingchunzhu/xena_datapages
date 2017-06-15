@@ -320,7 +320,15 @@ function cohortListPage(hosts, rootNode) {
 				}
 			});
 
-		rootNode.appendChild(domHelper.elt("h2", cohortC.filter(cohortName => cohortName !== COHORT_NULL).length + " Cohorts"));
+		// number of cohorts and datasets
+		var totalDatasets = document.createElement("span");
+		totalDatasets.setAttribute("id", "totalDatasetsN");
+		rootNode.appendChild(domHelper.elt("h2",
+			cohortC.filter(cohortName => cohortName !== COHORT_NULL).length + " Cohorts, ",
+			totalDatasets,
+			" Datasets"
+		));
+
 		var node = document.createElement("div");
 		node.setAttribute("id", "cohortList");
 		rootNode.appendChild(node);
@@ -335,8 +343,13 @@ function cohortListPage(hosts, rootNode) {
 			return a.toLowerCase().localeCompare(b.toLowerCase());
 		});
 
+		var totalDatasetsN = 0;
 		cohortC.map(function(cohort) {
 			eachCohortMultiple(cohort, hosts, node);
+			datasetList(hosts, cohort).subscribe(function(hostsList) {
+				totalDatasetsN = totalDatasetsN + _.reduce(hostsList, (memo, l) => {return memo + l.datasets.length;}, 0);
+				document.getElementById("totalDatasetsN").innerHTML = totalDatasetsN;
+			});
 		});
 	});
 
@@ -1257,7 +1270,7 @@ function bigDataSnippetPage (host, dataset, nSamples, nProbes) {
 
 //the front page of dataPages
 function frontPage (baseNode) {
-	var	container, sideNode, mainNode, cohortNode;
+	var	container, sideNode, cohortNode;
 
 	//overall container
 	container = domHelper.elt("div");
@@ -1268,15 +1281,11 @@ function frontPage (baseNode) {
 	container.appendChild(sideNode);
 
 	//main section cohort list page
-	mainNode = domHelper.elt("div");
-	mainNode.setAttribute("id", "dataPagesMain");
-
 	cohortNode = domHelper.sectionNode("cohort");
-	mainNode.appendChild(cohortNode);
+	container.appendChild(cohortNode);
 
 	//cohort list
 	cohortListPage(userActiveHosts(), cohortNode);
-	container.appendChild(mainNode);
 
 	//the end
 	container.appendChild(domHelper.elt("br"));
@@ -1371,8 +1380,7 @@ module.exports = (baseNode, state, callback, xQ) => {
 		container.appendChild(sideNode);
 
 		//main section dataset detail page
-		mainNode = domHelper.elt("div");
-		mainNode.setAttribute("id", "dataPagesMain");
+		mainNode = document.createElement("div");
 		container.appendChild(mainNode);
 
 		baseNode.appendChild(container);
@@ -1405,8 +1413,7 @@ module.exports = (baseNode, state, callback, xQ) => {
 		container.appendChild(sideNode);
 
 		//main section cohort list page
-		mainNode = domHelper.elt("div");
-		mainNode.setAttribute("id", "dataPagesMain");
+		mainNode = document.createElement("div");
 
 		cohortPage(cohort, userActiveHosts(), mainNode);
 		container.appendChild(mainNode);
