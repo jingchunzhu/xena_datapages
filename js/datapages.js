@@ -71,7 +71,7 @@ function checkGenomicDatasetAllBad(hosts, cohort, goodStatus) {
 	return datasetList(hosts, cohort).map(function (s) {
 		return s.every(function (r) {
 			if (r.datasets && r.datasets.length > 0) {
-				return r.datasets.some(function (dataset) {
+				return r.datasets.every(function (dataset) {
 					var format = dataset.type,
 						dataSubType = dataset.dataSubType,
 						patt = /filter/i,
