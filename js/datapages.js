@@ -353,8 +353,10 @@ function cohortListPage(hosts, rootNode) {
 	var totalDatasetsN = 0;
 	hosts.map(function (host) {
 		xenaQuery.allDatasetsN(host).catch(() => Rx.Observable.of([])).subscribe(s => {
-			totalDatasetsN = totalDatasetsN + s;
-			document.getElementById("totalDatasetsN").innerHTML = totalDatasetsN;
+			if (_.isNumber(s)) {
+				totalDatasetsN = totalDatasetsN + s;
+				document.getElementById("totalDatasetsN").innerHTML = totalDatasetsN;
+			}
 		});
 	});
 
