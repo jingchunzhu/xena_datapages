@@ -1414,8 +1414,8 @@ module.exports = (baseNode, state, callback, xQ) => {
 		container.setAttribute("id", "content-container");
 
 		//sidebar
-		sideNode = hubSideBar(activeHosts);
-		container.appendChild(sideNode);
+		//sideNode = hubSideBar(activeHosts);
+		//container.appendChild(sideNode);
 
 		//main section cohort list page
 		mainNode = document.createElement("div");
