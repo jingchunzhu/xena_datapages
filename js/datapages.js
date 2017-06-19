@@ -844,7 +844,7 @@ function datasetPage(dataset, host, baseNode) {
 		wranglingProcedure = dataset.wrangling_procedure,
 		type = dataset.type || TYPE_NULL,
 		urls,
-		link, metalink,
+		metalink,
 		status = dataset.status,
 		loaderWarning = dataset.loader,
 		probeMap = dataset.probeMap,
@@ -988,19 +988,14 @@ function datasetPage(dataset, host, baseNode) {
 	//probeMap
 	if (probeMap) {
 		sectionNode.appendChild(domHelper.elt("labelsameLength", "ID/Gene mapping"));
-		if (host === "https://genome-cancer.ucsc.edu:443/proj/public/xena") {
-			link = "https://genome-cancer.ucsc.edu/download/public/xena/" + probeMap.replace(/^public\//, "");
-			metalink = "https://genome-cancer.ucsc.edu/download/public/xena/" + probeMap.replace(/^public\//, "") + ".json";
-		}
-		else {
-			link = host + "/download/" + probeMap;
-			metalink = host + "/download/" + probeMap + ".json";
-		}
 
+		metalink = host + "/download/" + probeMap + ".json";
+		downloadNode = document.createElement("div");
 		sectionNode.appendChild(domHelper.elt("resultsameLength",
-			domHelper.hrefLink(probeMap, link),
-			document.createTextNode(";  "),
+			downloadNode,
+			document.createTextNode("; "),
 			domHelper.hrefLink("Metadata", metalink)));
+		downloadLinkUpdate({dsID: JSON.stringify({name: probeMap, host: host})}, downloadNode);
 
 		sectionNode.appendChild(domHelper.elt("br"));
 	}
