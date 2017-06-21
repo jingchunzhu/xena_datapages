@@ -249,7 +249,6 @@ function renderMarkDownFile(file, node)
 
 function buildCohortMetaDataLink(cohortName)
 {
-	cohortName = cohortName.replace("(", "-").replace(")", "");
 	return cohortMetaDataSource + "cohort_" + cohortName + "/info.mdown";
 }
 
@@ -381,6 +380,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 
 	//title
 	vizbuttonParent = domHelper.elt("h2", "cohort: ");
+	vizbuttonParent.style = "clear: both;";
 	node.appendChild(vizbuttonParent);
 
 	img = buildTreeHouseImage(cohortName);
