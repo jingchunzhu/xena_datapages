@@ -32,7 +32,7 @@ var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if
 	denseMatrixType = ['genomicMatrix', 'clinicalMatrix'],
 	treehouseImg = require('../images/Treehouse.jpg'),
 	infoImgSource = require('../images/Info.png'),
-	cohortMetaDataSource = "https://rawgit.com/ucscXena/cohortMetaData/master/";
+	cohortMetaDataSource = "https://cdn.rawgit.com/ucscXena/cohortMetaData/master/";
 
 const MAX_SAMPLES = 1000 * 1000;
 
@@ -43,7 +43,6 @@ function datasetList(servers, cohort) {
 				.map(datasets => ({server, datasets})))
 	);
 }
-
 
 // check if there is some genomic data for the cohort, if goodsStatus is a parameter, also check if the genomic data meet the status
 function checkGenomicDataset(hosts, cohort, goodStatus) {
