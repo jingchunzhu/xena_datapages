@@ -32,7 +32,7 @@ var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if
 	denseMatrixType = ['genomicMatrix', 'clinicalMatrix'],
 	treehouseImg = require('../images/Treehouse.jpg'),
 	infoImgSource = require('../images/Info.png'),
-	cohortMetaDataSource = "https://cdn.rawgit.com/ucscXena/cohortMetaData/master/";
+	cohortMetaDataSource = "https://rawgit.com/ucscXena/cohortMetaData/master/";
 
 const MAX_SAMPLES = 1000 * 1000;
 
