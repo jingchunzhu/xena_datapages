@@ -604,6 +604,7 @@ function addMoreDataLink (dataset, probesLength, linkNode) {
 	}
 	if (format === "clinicalMatrix") {
 		qStringObj.nSamples = 500;
+		qStringObj.nProbes = _.min([100, probesLength]);
 	}
 	qString = domHelper.JSONToqueryString(qStringObj);
 	link = "../datapages/?" + qString;
@@ -1093,7 +1094,7 @@ function datasetPage(dataset, host, baseNode) {
 
 		tmpNode = domHelper.elt("a", "Show More Data");
 		tmpNode.setAttribute("class", "textLink");
-		addMoreDataLink(dataset, probesC.length, tmpNode);
+		addMoreDataLink(dataset, probesC, tmpNode);
 		spaceHolderNode.appendChild(tmpNode);
 
 		tmpNode = domHelper.elt("a", "All Identifiers");
