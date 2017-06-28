@@ -40,7 +40,7 @@ defaultNames[defaultICGC] = "ICGC hub";
 defaultNames[defaultTOIL] = "GA4GH (TOIL) hub";
 defaultNames[defaultPCAWG] = "PCAWG public hub";
 defaultNames[defaultSinglecell] = "Single-cell RNAseq hub";
-defaultNames[defaultPancanAtlas] = "PancanAtlas hub";
+defaultNames[defaultPancanAtlas] = "PanCanAtlas hub";
 
 module.exports = {
 	defaultHosts,
