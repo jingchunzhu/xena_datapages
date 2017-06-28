@@ -25,15 +25,6 @@ function valueNode(valueId) {
 	return node;
 }
 
-// create an ELEMENT_NODE with label:<valueId> where valueId a DOM placement holder with id=<valueId>, for filling in the values later
-//  use function like
-//          node = document.getElementById(valueId);
-//          node.appendChild(document.createTextNode(VALUE));
-function labelValueNode(label, valueId) {
-	var node = elt("label", label);
-	node.appendChild(valueNode(valueId));
-	return node;
-}
 
 //create an ELEMENT_NODE with tag=<section> and id=label
 function sectionNode(label) {
@@ -80,14 +71,14 @@ var qString = Object.keys(obj).map(function(k) {
 
 
 function tableCreate(row, column) {
-  var tbl  = document.createElement('table'), tr, td, i, j;
-  tbl.setAttribute("class", "dataSnippetTable");
-  for(i = 0; i < row; i++) {
-  tr = tbl.insertRow(i);
-  for(j = 0; j < column; j++) {
-	td = tr.insertCell(j);
-	td.innerHTML = "...";
-  }
+	var tbl  = document.createElement('table'), tr, td, i, j;
+	tbl.setAttribute("class", "dataSnippetTable");
+	for(i = 0; i < row; i++) {
+		tr = tbl.insertRow(i);
+		for(j = 0; j < column; j++) {
+			td = tr.insertCell(j);
+			td.innerHTML = "...";
+		}
   }
   return tbl;
 }
@@ -96,35 +87,9 @@ function setTableCellValue (tbl, row, column, value) {
 	tbl.rows[row].cells[column].innerHTML = value;
 }
 
-function stringToDOM(str) {
-	var d = document.createElement('div');
-	d.innerHTML = str;
-	return d.childNodes;
-}
-
-function append(el, list) {
-	while (list.length) {
-		el.appendChild(list[0]);
-	}
-}
-
-function loadingCircle() {
-	var div = sectionNode("cohort"),
-		node = document.createElement("div"),
-		i;
-
-	div.appendChild(node);
-	node.setAttribute("class", "spinner circles");
-	for (i = 0; i < 8; i++) {
-	node.appendChild(document.createElement("div"));
-	}
-	return div;
-}
-
 module.exports = {
 	elt: elt,
 	hrefLink: hrefLink,
-	labelValueNode: labelValueNode,
 	valueNode: valueNode,
 	sectionNode: sectionNode,
 	stripHTML: stripHTML,
@@ -132,8 +97,5 @@ module.exports = {
 	tableCreate: tableCreate,
 	setTableCellValue: setTableCellValue,
 	queryStringToJSON: queryStringToJSON,
-	JSONToqueryString: JSONToqueryString,
-	stringToDOM: stringToDOM,
-	append: append,
-	loadingCircle: loadingCircle
+	JSONToqueryString: JSONToqueryString
 };

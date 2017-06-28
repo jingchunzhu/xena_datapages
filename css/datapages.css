@@ -177,13 +177,4 @@ max-width: 100px;
 min-width: 30px;
 }
 
-.tooltip{
-  background:black;
-  color:white;
-  border-radius:10px;
-  opacity:0;
-  position: absolute;
-  width:100px;
-  text-align: center;
-}
 

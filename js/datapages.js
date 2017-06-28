@@ -12,7 +12,10 @@ var xenaAdmin = require("./xenaAdmin");
 var {defaultLocal} = require('./defaults');
 
 require("../css/datapages.css");
-
+var React = require("react");
+var ReactDOM = require("react-dom");
+var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
+var Tooltip = require('react-bootstrap/lib/Tooltip');
 var showdown = require('showdown');  /* https://github.com/showdownjs/showdown */
 
 var {activeHosts} = session;
@@ -31,7 +34,6 @@ var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if
 	},
 	denseMatrixType = ['genomicMatrix', 'clinicalMatrix'],
 	treehouseImg = require('../images/Treehouse.jpg'),
-	infoImgSource = require('../images/Info.png'),
 	cohortMetaDataSource = "https://rawgit.com/ucscXena/cohortMetaData/master/";
 
 const MAX_SAMPLES = 1000 * 1000;
@@ -177,53 +179,18 @@ function warningPopUp (node, loaderWarning) {
 	};
 }
 
-function adhocTooltip (outsideDiv, tooltipDOM, tipMessage ) {
-	var fadeSpeed = 25; // a value between 1 and 1000 where 1000 will take 10
-						// seconds to fade in and out and 1 will take 0.01 sec.
-
-	var showTip = function() {
-		var tip = document.createElement("span");
-	tip.className = "tooltip";
-	tip.id = "tip";
-	tip.innerHTML = tipMessage;
-	  outsideDiv.appendChild(tip);
-	tip.style.opacity = "0"; // to start with...
-	var intId = setInterval(function() {
-		var newOpacity = parseFloat(tip.style.opacity) + 0.1;
-		tip.style.opacity = newOpacity.toString();
-		if(tip.style.opacity === "1") {
-			clearInterval(intId);
+function buildInfoImage (node, tipMessage) {
+	var infoIcon = React.createClass({
+		render() {
+			return (
+				<OverlayTrigger overlay={<Tooltip>{tipMessage}</Tooltip>} trigger={['hover']} placement="top">
+					<span className="glyphicon glyphicon-info-sign text-muted" style = {{margin: "5px"}}/>
+				</OverlayTrigger>
+			);
 		}
-	}, fadeSpeed);
-	};
-	var hideTip = function() {
-		var tip = document.getElementById("tip");
-		var intId = setInterval(function() {
-			var newOpacity = parseFloat(tip.style.opacity) - 0.1;
-			tip.style.opacity = newOpacity.toString();
-			if(tip.style.opacity === "0") {
-				clearInterval(intId);
-				tip.remove();
-			}
-		}, fadeSpeed);
-		tip.remove();
-	};
+	});
 
-	tooltipDOM.addEventListener("mouseover", showTip, false);
-	tooltipDOM.addEventListener("mouseout", hideTip, false);
-}
-
-function buildInfoImage (tipMessage) {
-	var node = document.createElement("span"),
-		img = new Image();
-
-	img.src = infoImgSource;
-	img.height = "20";
-	node.appendChild(img);
-
-	adhocTooltip(node, img, tipMessage);
-
-	return node;
+	ReactDOM.render(React.createElement(infoIcon), node);
 }
 
 function buildTreeHouseImage (cohortName) {
@@ -262,7 +229,7 @@ function eachCohortMultiple(cohortName, hosts, node) {
 	//info image
 	tmpNode = document.createElement("a");
 	tmpNode.setAttribute("href", link);
-	tmpNode.appendChild(buildInfoImage("click for cohort detail ..."));
+	buildInfoImage(tmpNode, "Cohort detail");
 	liNode.appendChild(tmpNode);
 
 	//treehouse img
@@ -448,8 +415,8 @@ function cohortPage(cohortName, hosts, rootNode) {
 						//info image
 						tmpNode = document.createElement("a");
 						tmpNode.setAttribute("href", link);
-						tmpNode.appendChild(buildInfoImage("click for dateset detail ..."));
 						datasetNode.appendChild(tmpNode);
+						buildInfoImage(tmpNode, "Dateset detail");
 
 						//dataset name and link
 						datasetNode.appendChild(domHelper.hrefLink(dataset.label, link));
