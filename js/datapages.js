@@ -179,18 +179,19 @@ function warningPopUp (node, loaderWarning) {
 	};
 }
 
-function buildInfoImage (node, tipMessage) {
-	var infoIcon = React.createClass({
-		render() {
-			return (
-				<OverlayTrigger overlay={<Tooltip>{tipMessage}</Tooltip>} trigger={['hover']} placement="top">
-					<span className="glyphicon glyphicon-info-sign text-muted" style = {{margin: "5px"}}/>
-				</OverlayTrigger>
-			);
-		}
-	});
+var infoIcon = React.createClass({
+	render() {
+		var {tipMessage} = this.props;
+		return (
+			<OverlayTrigger overlay={<Tooltip>{tipMessage}</Tooltip>} trigger={['hover']} placement="top">
+				<span className="glyphicon glyphicon-info-sign text-muted" style = {{margin: "2px"}}/>
+			</OverlayTrigger>
+		);
+	}
+});
 
-	ReactDOM.render(React.createElement(infoIcon), node);
+function buildInfoImage (node, tipMessage) {
+	ReactDOM.render(React.createElement(infoIcon, {tipMessage: tipMessage}), node);
 }
 
 function buildTreeHouseImage (cohortName) {
