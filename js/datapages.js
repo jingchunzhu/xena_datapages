@@ -322,7 +322,7 @@ function cohortListPage(hosts, rootNode) {
 			if (_.isNumber(s)) {
 				totalDatasetsN = totalDatasetsN + s;
 				document.getElementById("totalDatasetsN").innerHTML =
-					totalDatasetsN > 1 ? totalDatasetsN + ' Datasets' : "1 Dateset";
+					totalDatasetsN > 1 ? totalDatasetsN + ' Datasets' : "1 Dataset";
 			}
 		});
 	});
