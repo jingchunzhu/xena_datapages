@@ -292,8 +292,10 @@ function cohortListPage(hosts, rootNode) {
 			});
 
 		var totalCohortsN = cohortC.filter(cohortName => cohortName !== COHORT_NULL).length;
-		document.getElementById("totalCohortsN").innerHTML =
-			totalCohortsN > 1 ? totalCohortsN + ' Cohorts, ' : "1 Cohort, ";
+		if (totalCohortsN) {
+			document.getElementById("totalCohortsN").innerHTML =
+				totalCohortsN > 1 ? totalCohortsN + ' Cohorts, ' : "1 Cohort, ";
+		}
 
 		var node = document.createElement("div");
 		node.setAttribute("id", "cohortList");
@@ -324,8 +326,6 @@ function cohortListPage(hosts, rootNode) {
 			}
 		});
 	});
-
-	rootNode.appendChild(document.createElement("br"));
 }
 
 //	build single COHORT page
@@ -1285,6 +1285,7 @@ function hostPage (baseNode, host) {
 	// cohort list
 	cohortListPage([host], node);
 	baseNode.appendChild(node);
+	baseNode.appendChild(domHelper.elt("br"));
 }
 
 function ucscHostNormalize(host) {
