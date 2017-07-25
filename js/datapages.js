@@ -275,10 +275,7 @@ function cohortListPage(hosts, rootNode) {
 	totalDatasets.setAttribute("id", "totalDatasetsN");
 	totalCohorts.setAttribute("id", "totalCohortsN");
 
-	rootNode.appendChild(domHelper.elt("h2",
-		totalCohorts, " Cohorts, ",
-		totalDatasets, " Datasets"
-	));
+	rootNode.appendChild(domHelper.elt("h2", totalCohorts, totalDatasets));
 
 	var source = Rx.Observable.zipArray(
 		hosts.map(function (host) {
@@ -294,8 +291,9 @@ function cohortListPage(hosts, rootNode) {
 				}
 			});
 
+		var totalCohortsN = cohortC.filter(cohortName => cohortName !== COHORT_NULL).length;
 		document.getElementById("totalCohortsN").innerHTML =
-			cohortC.filter(cohortName => cohortName !== COHORT_NULL).length;
+			totalCohortsN > 1 ? totalCohortsN + ' Cohorts, ' : "1 Cohort, ";
 
 		var node = document.createElement("div");
 		node.setAttribute("id", "cohortList");
@@ -321,7 +319,8 @@ function cohortListPage(hosts, rootNode) {
 		xenaQuery.allDatasetsN(host).catch(() => Rx.Observable.of([])).subscribe(s => {
 			if (_.isNumber(s)) {
 				totalDatasetsN = totalDatasetsN + s;
-				document.getElementById("totalDatasetsN").innerHTML = totalDatasetsN;
+				document.getElementById("totalDatasetsN").innerHTML =
+					totalDatasetsN > 1 ? totalDatasetsN + ' Datasets' : "1 Dateset";
 			}
 		});
 	});
