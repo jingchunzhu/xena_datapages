@@ -1,6 +1,13 @@
 /* default elements */
 
 /* Layout */
+body {
+padding-bottom: 115px;
+height: 100%;
+min-height: 100vh;
+position: relative;
+}
+
 body #main
 {
 margin: 0;
@@ -90,7 +97,6 @@ font-size: 0.8em;
 
 #main #content-container
 {
-float: left;
 width: 100%;
 }
 
