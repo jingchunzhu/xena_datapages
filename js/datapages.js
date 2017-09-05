@@ -1094,11 +1094,11 @@ function backtoDatasetButton (host, dataset) {
 	return button;
 }
 
-function allIdentifiersPage (host, dataset, label) {
+function allIdentifiersPage (host, baseNode, dataset, label) {
 	var textNode, text,
 		rootNode = domHelper.sectionNode("bigDataSnippet");
 
-	document.body.appendChild(rootNode);
+	baseNode.appendChild(rootNode);
 	rootNode.appendChild(domHelper.elt("h3", "dataset: " + label, backtoDatasetButton(host, dataset)));
 	textNode = domHelper.elt("div", "Querying xena on " + host + " ... ");
 	rootNode.appendChild(textNode);
@@ -1114,11 +1114,11 @@ function allIdentifiersPage (host, dataset, label) {
 	});
 }
 
-function allSamplesPage (host, dataset, label) {
+function allSamplesPage (host, baseNode, dataset, label) {
 	var textNode, text,
 		rootNode = domHelper.sectionNode("bigDataSnippet");
 
-	document.body.appendChild(rootNode);
+	baseNode.appendChild(rootNode);
 	rootNode.appendChild(domHelper.elt("h3", "dataset: " + label, backtoDatasetButton(host, dataset)));
 	textNode = document.createElement("pre");
 	rootNode.appendChild(textNode);
@@ -1217,12 +1217,12 @@ function datasetSideBar(dataset, sideNode) {
 }
 
 
-function bigDataSnippetPage (host, dataset, nSamples, nProbes) {
+function bigDataSnippetPage (host, baseNode, dataset, nSamples, nProbes) {
 	var blockNode = domHelper.elt("span", "If you are reading this, you need release browser SHIELD to see the data requested"),
 		rootNode = domHelper.sectionNode("bigDataSnippet"),
 		node = document.createElement("div");
 
-	document.body.appendChild(rootNode);
+	baseNode.appendChild(rootNode);
 	rootNode.appendChild(node);
 	node.appendChild( domHelper.elt("h3", "dataset: " + dataset, backtoDatasetButton(host, dataset)));
 	node.appendChild( blockNode );
@@ -1394,21 +1394,25 @@ module.exports = (baseNode, state, callback, xQ) => {
 
 	// large data snippet
 	else if (keys.length === 4 && host && dataset && nSamples && nProbes) {
-		bigDataSnippetPage (host, dataset, nSamples, nProbes);
+		bigDataSnippetPage (host, baseNode, dataset, nSamples, nProbes);
 	}
 
 	// all identifiers of a dataset
 	else if (keys.length === 4 && host && dataset && label && allIdentifiers) {
-		allIdentifiersPage (host, dataset, label);
+		allIdentifiersPage (host, baseNode, dataset, label);
 	}
 
 	// all samples of a dataset
 	else if (keys.length === 4 && host && dataset && label && allSamples) {
-		allSamplesPage (host, dataset, label);
+	    allSamplesPage (host, baseNode, dataset, label);
 	}
 
 	// front page: cohort list
 	else {
 		frontPage(baseNode);
 	}
+
+	baseNode.appendChild(document.createElement("br"));
+	baseNode.appendChild(document.createElement("br"));
+	baseNode.appendChild(document.createElement("br"));
 };
