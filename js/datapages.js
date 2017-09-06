@@ -12,10 +12,6 @@ var xenaAdmin = require("./xenaAdmin");
 var {defaultLocal} = require('./defaults');
 
 require("../css/datapages.css");
-var React = require("react");
-var ReactDOM = require("react-dom");
-var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
-var Tooltip = require('react-bootstrap/lib/Tooltip');
 var showdown = require('showdown');  /* https://github.com/showdownjs/showdown */
 
 var {activeHosts} = session;
@@ -146,23 +142,6 @@ function cohortHeatmapButton(cohort, hosts, vizbuttonParent) {
 	});
 }
 
-function cohortVizButtonBootstrap(cohort, hosts, vizbuttonParent) {
-	var vizbutton,
-		goodStatus = session.GOODSTATUS;
-
-	ifCohortExistDo(cohort, hosts, goodStatus, function() {
-		vizbutton = document.createElement("input");
-		vizbutton.type = "button";
-		vizbutton.className = "btn btn-primary";
-		vizbutton.value = "Visualize";
-		vizbutton.addEventListener("click", function() {
-			session.xenaHeatmapSetCohort(cohort);
-			location.href = "../heatmap/";
-		});
-		vizbuttonParent.appendChild(vizbutton);
-	});
-}
-
 function configHubButton () {
 	var button = document.createElement("BUTTON");
 	button.setAttribute("class", "vizbutton");
@@ -179,7 +158,7 @@ function warningPopUp (node, loaderWarning) {
 	};
 }
 
-var infoIcon = React.createClass({
+/*var infoIcon = React.createClass({
 	render() {
 		var {tipMessage} = this.props;
 		return (
@@ -193,6 +172,7 @@ var infoIcon = React.createClass({
 function buildInfoImage (node, tipMessage) {
 	ReactDOM.render(React.createElement(infoIcon, {tipMessage: tipMessage}), node);
 }
+*/
 
 function buildTreeHouseImage (cohortName) {
 	var img;
@@ -230,7 +210,7 @@ function eachCohortMultiple(cohortName, hosts, node) {
 	//info image
 	tmpNode = document.createElement("a");
 	tmpNode.setAttribute("href", link);
-	buildInfoImage(tmpNode, "Cohort detail");
+	//buildInfoImage(tmpNode, "Cohort detail");
 	liNode.appendChild(tmpNode);
 
 	//treehouse img
@@ -354,7 +334,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 			vizbuttonParent.appendChild(img);
 	}
 	vizbuttonParent.appendChild(document.createTextNode(cohortName + ' '));
-	cohortVizButtonBootstrap(cohortName, userActiveHosts(), vizbuttonParent);
+	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent);
 
 
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
@@ -399,8 +379,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 					}
 
 					listNode = domHelper.elt("div");
-
-					_.sortBy(datasetsBySubtype[dataSubType], "label").map(function (dataset) {
+					_.sortBy(datasetsBySubtype[dataSubType], 'label').map(function (dataset) {
 						var fullname = dataset.host + dataset.name,
 							link = "?dataset=" + dataset.name + "&host=" + dataset.host,
 							datasetNode = document.createElement("ul");
@@ -416,7 +395,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 						tmpNode = document.createElement("a");
 						tmpNode.setAttribute("href", link);
 						datasetNode.appendChild(tmpNode);
-						buildInfoImage(tmpNode, "Dateset detail");
+						//buildInfoImage(tmpNode, "Dateset detail");
 
 						//dataset name and link
 						datasetNode.appendChild(domHelper.hrefLink(dataset.label, link));
@@ -836,25 +815,28 @@ function datasetPage(dataset, host, baseNode) {
 	var sectionNode = domHelper.sectionNode("dataset");
 
 	// dataset title
-	sectionNode.appendChild(domHelper.elt("h2", "dataset: " + label));
+	sectionNode.appendChild(domHelper.elt("h2", "dataset: " + (dataType ? (dataType + ' - ') : '') + label));
 	sectionNode.appendChild(domHelper.elt("br"));
 
 	// long title
 	if (longTitle) {
-		sectionNode.appendChild(document.createTextNode(longTitle));
+		tmpNode = domHelper.elt("resultsameLength");
+		tmpNode.innerHTML = longTitle;
+
+		sectionNode.appendChild(tmpNode);
 		sectionNode.appendChild(domHelper.elt("br"));
 	}
 
 	//description
 	if (description) {
-		sectionNode.appendChild(domHelper.elt("br"));
-
-		tmpNode = domHelper.elt("result2");
+		tmpNode = domHelper.elt("resultsameLength");
 		tmpNode.innerHTML = description;
 
 		sectionNode.appendChild(tmpNode);
 		sectionNode.appendChild(domHelper.elt("br"));
 	}
+
+	sectionNode.appendChild(domHelper.elt("br"));
 
 	// cohort:xxx
 	sectionNode.appendChild(domHelper.elt("labelsameLength", "cohort"));
@@ -1153,18 +1135,18 @@ function hubSideBar(hosts) {
 
 	var checkNode = domHelper.sectionNode("sidehub");
 
-	checkNode.appendChild(domHelper.elt("h3", domHelper.hrefLink("Active Data Hubs", "../hub/")));
-	checkNode.appendChild(domHelper.elt("h3"));
+	checkNode.appendChild(domHelper.elt("h2", domHelper.hrefLink("Active Data Hubs", "../hub/")));
+	checkNode.appendChild(domHelper.elt("h2"));
 
 	hosts.forEach(function (host) {
 		session.updateHostStatus(host);
 		var checkbox = session.metaDataFilterCheckBox(host),
-			tmpNode = domHelper.elt("result2",
+			tmpNode = domHelper.elt("span",
 				domHelper.hrefLink(session.getHubName(host) + " (connecting)", "../datapages/?host=" + host));
 
 		tmpNode.setAttribute("id", "sidebar" + host);
 		checkbox.setAttribute("id", "sidebarCheck" + host);
-		checkNode.appendChild(domHelper.elt("h4", checkbox, " ", tmpNode));
+		checkNode.appendChild(domHelper.elt("span", checkbox, " ", tmpNode));
 		checkNode.appendChild(domHelper.elt("h4"));
 	});
 	sideNode.appendChild(checkNode);

@@ -6,39 +6,29 @@ padding-bottom: 115px;
 height: 100%;
 min-height: 100vh;
 position: relative;
-}
-
-body #main
-{
 margin: 0;
-padding:0;
 font-family: arial, Verdana,'Lucida Grande', Verdana, Helvetica, sans-serif;
 background-color:#ffffff;
 list-style:none;
+line-height: 120%;
+color: #333;
 }
 
-#main a:link
-{
-font-weight:normal;
-font-style:normal;
-text-decoration:none;
+a {
+color: #2d6da4;
+text-decoration: none;
 }
 
-#main a:visited
-{
-font-style:normal;
-font-weight:normal;
-text-decoration:none;
-}
-
-
-#main a:hover
+a:hover
 {
 color:#ff6600;
 font-style:normal;
 text-decoration:underline;
 }
 
+resultsameLength u {
+text-decoration: none;
+}
 
 #main label
 {
@@ -49,14 +39,14 @@ margin-top: 5px;
 margin-bottom: 5px;
 }
 
-#main .textLink
+.textLink
 {
 margin-right: 20px;
 margin-bottom: 10px;
 display: inline-block;
 }
 
-#main labelsameLength
+labelsameLength
 {
 margin-top: 5px;
 margin-bottom: 5px;
@@ -64,19 +54,14 @@ display: inline-block;
 width: 150px;
 }
 
-#main result2 a
-{
-color:gray;
-margin-right: 2px;
-}
-
-#main resultsameLength
+resultsameLength
 {
 display: inline-block;
 width: 70%;
 vertical-align: middle;
 margin-top: 5px;
 margin-bottom: 5px;
+font-size: 0.9em;
 }
 
 #main summary
@@ -135,11 +120,8 @@ display: inline-block;
   margin-right: auto;
 }
 
-#dataset h2,#hub h2,#cohort h2
-{
-color:#404040;
-margin-top: 20px;
-margin-bottom: 20px;
+h2, h3, h4 {
+color:#404040;	
 }
 
 #dataType header,#samples header,#others header
