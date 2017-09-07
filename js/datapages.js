@@ -326,7 +326,6 @@ function cohortPage(cohortName, hosts, rootNode) {
 
 	//title
 	vizbuttonParent = domHelper.elt("h2", "cohort: ");
-	vizbuttonParent.style = "clear: both;";
 	node.appendChild(vizbuttonParent);
 
 	img = buildTreeHouseImage(cohortName);
@@ -335,7 +334,6 @@ function cohortPage(cohortName, hosts, rootNode) {
 	}
 	vizbuttonParent.appendChild(document.createTextNode(cohortName + ' '));
 	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent);
-
 
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
 		//dataset list
@@ -816,7 +814,6 @@ function datasetPage(dataset, host, baseNode) {
 
 	// dataset title
 	sectionNode.appendChild(domHelper.elt("h2", "dataset: " + (dataType ? (dataType + ' - ') : '') + label));
-	sectionNode.appendChild(domHelper.elt("br"));
 
 	// long title
 	if (longTitle) {
@@ -1225,7 +1222,6 @@ function frontPage (baseNode) {
 
 	//overall container
 	container = domHelper.elt("div");
-	container.setAttribute("id", "content-container");
 
 	//sidebar
 	sideNode = hubSideBar(activeHosts);
@@ -1325,7 +1321,6 @@ module.exports = (baseNode, state, callback, xQ) => {
 	// ?dataset=id & host=id
 	else if (keys.length === 2 && host && dataset) {
 		container = domHelper.elt("div");
-		container.setAttribute("id", "content-container");
 
 		sideNode = domHelper.elt("div");
 		sideNode.setAttribute("id", "sidebar");
