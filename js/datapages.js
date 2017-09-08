@@ -377,7 +377,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 					}
 
 					listNode = domHelper.elt("div");
-					_.sortBy(datasetsBySubtype[dataSubType], 'label').map(function (dataset) {
+					_.sortBy(datasetsBySubtype[dataSubType], d => d.label.toLowerCase()).map(function (dataset) {
 						var fullname = dataset.host + dataset.name,
 							link = "?dataset=" + dataset.name + "&host=" + dataset.host,
 							datasetNode = document.createElement("ul");
