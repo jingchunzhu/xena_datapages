@@ -204,14 +204,10 @@ function eachCohortMultiple(cohortName, hosts, node) {
 	var liNode = document.createElement("li"),
 		img,
 		link = "?cohort=" + encodeURIComponent(cohortName),
-		nodeTitle = domHelper.hrefLink(cohortName, link),
-		tmpNode;
+		nodeTitle = domHelper.hrefLink(cohortName, link);
+		// tmpNode;
 
-	//info image
-	tmpNode = document.createElement("a");
-	tmpNode.setAttribute("href", link);
-	//buildInfoImage(tmpNode, "Cohort detail");
-	liNode.appendChild(tmpNode);
+	nodeTitle.setAttribute("class", 'cohortLink');
 
 	//treehouse img
 	img = buildTreeHouseImage(cohortName);
@@ -227,15 +223,18 @@ function eachCohortMultiple(cohortName, hosts, node) {
 	//title
 	liNode.appendChild(nodeTitle);
 
-	//viz button
-	tmpNode = document.createElement("span");
-	liNode.appendChild(tmpNode);
-	cohortHeatmapButton(cohortName, userActiveHosts(), tmpNode);
-
-	// new status
-	tmpNode = document.createElement("span");
+	//learn more button
+	/*tmpNode = document.createElement("span");
 	liNode.appendChild(tmpNode);
 
+	var	vizbutton = document.createElement("BUTTON");
+	vizbutton.setAttribute("class", "vizbutton");
+	vizbutton.appendChild(document.createTextNode("Learn More"));
+	vizbutton.addEventListener("click", function() {
+		location.href = "?cohort=" + cohortName; //goto cohort detail page
+	});
+	tmpNode.appendChild(vizbutton);
+	*/
 	node.appendChild(liNode);
 
 	//remove extra
@@ -396,7 +395,9 @@ function cohortPage(cohortName, hosts, rootNode) {
 						//buildInfoImage(tmpNode, "Dateset detail");
 
 						//dataset name and link
-						datasetNode.appendChild(domHelper.hrefLink(dataset.label, link));
+						tmpNode = domHelper.hrefLink(dataset.label, link);
+						tmpNode.setAttribute("class", "cohortLink");
+						datasetNode.appendChild(tmpNode);
 
 						//status
 						if (dataset.status === session.GOODSTATUS ) { // good data, with or without warning

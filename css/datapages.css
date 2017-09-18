@@ -17,8 +17,8 @@ line-height: 130%;
 color: #333;
 }
 
-#footer ul {
-  padding-left: 0;
+body #footer ul {
+padding-left: 0;
 }
 
 a {
@@ -63,6 +63,10 @@ margin-left: 3px;
 margin-right: 3px;
 margin-top: 5px;
 margin-bottom: 5px;
+}
+
+.cohortLink {
+text-decoration: underline;
 }
 
 .textLink
