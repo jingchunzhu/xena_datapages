@@ -185,3 +185,9 @@ max-width: 100px;
 min-width: 30px;
 }
 
+.star {
+color: red;
+font-size: 1.5em;
+padding-left: 2px;
+display: inline-block;
+}

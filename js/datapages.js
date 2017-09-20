@@ -30,7 +30,8 @@ var queryString = domHelper.queryStringToJSON(),  	//parse current url to see if
 	},
 	denseMatrixType = ['genomicMatrix', 'clinicalMatrix'],
 	treehouseImg = require('../images/Treehouse.jpg'),
-	cohortMetaDataSource = "https://rawgit.com/ucscXena/cohortMetaData/master/";
+	cohortMetaDataSource = "https://rawgit.com/ucscXena/cohortMetaData/master/",
+	defaultDatasetsJSON = "https://rawgit.com/ucscXena/cohortMetaData/master/defaultDataset.json";
 
 const MAX_SAMPLES = 1000 * 1000;
 
@@ -158,22 +159,6 @@ function warningPopUp (node, loaderWarning) {
 	};
 }
 
-/*var infoIcon = React.createClass({
-	render() {
-		var {tipMessage} = this.props;
-		return (
-			<OverlayTrigger overlay={<Tooltip>{tipMessage}</Tooltip>} trigger={['hover']} placement="top">
-				<span className="glyphicon glyphicon-info-sign text-muted" style = {{margin: "2px"}}/>
-			</OverlayTrigger>
-		);
-	}
-});
-
-function buildInfoImage (node, tipMessage) {
-	ReactDOM.render(React.createElement(infoIcon, {tipMessage: tipMessage}), node);
-}
-*/
-
 function buildTreeHouseImage (cohortName) {
 	var img;
 	if (cohortName.search(/^Treehouse/gi) !== -1) {
@@ -205,7 +190,6 @@ function eachCohortMultiple(cohortName, hosts, node) {
 		img,
 		link = "?cohort=" + encodeURIComponent(cohortName),
 		nodeTitle = domHelper.hrefLink(cohortName, link);
-		// tmpNode;
 
 	nodeTitle.setAttribute("class", 'cohortLink');
 
@@ -223,18 +207,6 @@ function eachCohortMultiple(cohortName, hosts, node) {
 	//title
 	liNode.appendChild(nodeTitle);
 
-	//learn more button
-	/*tmpNode = document.createElement("span");
-	liNode.appendChild(tmpNode);
-
-	var	vizbutton = document.createElement("BUTTON");
-	vizbutton.setAttribute("class", "vizbutton");
-	vizbutton.appendChild(document.createTextNode("Learn More"));
-	vizbutton.addEventListener("click", function() {
-		location.href = "?cohort=" + cohortName; //goto cohort detail page
-	});
-	tmpNode.appendChild(vizbutton);
-	*/
 	node.appendChild(liNode);
 
 	//remove extra
@@ -311,10 +283,32 @@ function cohortListPage(hosts, rootNode) {
 function cohortPage(cohortName, hosts, rootNode) {
 	//cohort section
 	var tmpNode, img,
-	node = domHelper.sectionNode("cohort"),
-	vizbuttonParent;
+		node = domHelper.sectionNode("cohort"), // header
+		vizbuttonParent,
+		nodeDataType = domHelper.sectionNode("dataType"),  // dataType section
+		defaultDatasets,
+		defaultLegend = domHelper.sectionNode("dataType");
 
 	rootNode.appendChild(node);
+	rootNode.appendChild(nodeDataType);
+	rootNode.appendChild(defaultLegend);
+
+	// default datasests
+	Rx.Observable.ajax({url: defaultDatasetsJSON, crossDomain: true, method: 'GET', responseType: 'text'}).subscribe(function(resp) {
+		defaultDatasets = _.values(JSON.parse(resp.response)[cohortName]);
+		// default dataset legend
+		if (!_.isEmpty(defaultDatasets)) {
+			var legend = document.createElement("sapn");
+			legend.innerHTML = "*";
+			legend.style.color = "red";
+			legend.style.fontSize = "1.5em";
+			defaultLegend.appendChild(legend);
+
+			legend = document.createElement("sapn");
+			legend.innerHTML = "default dataset in visualization basic mode";
+			defaultLegend.appendChild(legend);
+		}
+	});
 
 	//cohort markdown
 	var mdFile = buildCohortMetaDataLink(cohortName),
@@ -331,122 +325,120 @@ function cohortPage(cohortName, hosts, rootNode) {
 		if (img) {
 			vizbuttonParent.appendChild(img);
 	}
-	vizbuttonParent.appendChild(document.createTextNode(cohortName + ' '));
+	// visualization button
+	vizbuttonParent.appendChild(document.createTextNode(cohortName));
 	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent);
 
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
 		//dataset list
-		datasetList(hosts, cohortName).subscribe(
-			function (s) {
-				//collection datasets by dataSubType
-				var datasetsBySubtype = {};
-				_.map(s, r => {
-					var host = r.server,
-						datasets = r.datasets;
-					_.map (datasets, dataset => {
-						var type = dataset.dataSubType,
-							format = dataset.type;
+		datasetList(hosts, cohortName).subscribe(function (s) {
+			//collection datasets by dataSubType
+			var datasetsBySubtype = {};
 
-						dataset.host = host;
-						dataset.label = dataset.label ? dataset.label : dataset.name;
+			_.map(s, r => {
+				var host = r.server,
+					datasets = r.datasets;
+				_.map (datasets, dataset => {
+					var type = dataset.dataSubType,
+						format = dataset.type;
 
-						if (NOT_GENOMICS.indexOf(format) === -1) {
-							if (!(datasetsBySubtype[type])) {
-								datasetsBySubtype[type] = [];
-							}
-							datasetsBySubtype[type].push(dataset);
+					dataset.host = host;
+					dataset.label = dataset.label ? dataset.label : dataset.name;
+
+					if (NOT_GENOMICS.indexOf(format) === -1) {
+						if (!(datasetsBySubtype[type])) {
+							datasetsBySubtype[type] = [];
 						}
-					});
+						datasetsBySubtype[type].push(dataset);
+					}
 				});
+			});
 
-				// dataType section
-				var nodeDataType = domHelper.sectionNode("dataType");
+			var dataTypes = _.keys(datasetsBySubtype).sort(function (a, b) {
+				return a.toLowerCase().localeCompare(b.toLowerCase());
+			});
 
-				var dataTypes = _.keys(datasetsBySubtype).sort(function (a, b) {
-						return a.toLowerCase().localeCompare(b.toLowerCase());
-					});
+			dataTypes.map(function (dataSubType) {
+				var headerDisplayed,
+					displayType = dataSubType;
 
-				dataTypes.map(function (dataSubType) {
-					var headerDisplayed,
-						listNode,
-						displayType = dataSubType;
+				if (dataSubType === "undefined") {
+					displayType = "others";
+				}
 
-					if (dataSubType === "undefined") {
-						displayType = "others";
+				_.sortBy(datasetsBySubtype[dataSubType], d => d.label.toLowerCase()).map(function (dataset) {
+					var listNode = domHelper.elt("div"),
+						fullname = dataset.host + dataset.name,
+						link = "?dataset=" + dataset.name + "&host=" + dataset.host,
+						datasetNode = document.createElement("ul");
+
+					if (dataSubType && (dataSubType.search(/filter/i) !== -1) && (dataset.host !== defaultLocal)) {
+						return;
+					} else if (!headerDisplayed) {
+						nodeDataType.appendChild(domHelper.elt("header", displayType));
+						headerDisplayed = 1;
 					}
 
-					listNode = domHelper.elt("div");
-					_.sortBy(datasetsBySubtype[dataSubType], d => d.label.toLowerCase()).map(function (dataset) {
-						var fullname = dataset.host + dataset.name,
-							link = "?dataset=" + dataset.name + "&host=" + dataset.host,
-							datasetNode = document.createElement("ul");
-
-						if (dataSubType && (dataSubType.search(/filter/i) !== -1) && (dataset.host !== defaultLocal)) {
-							return;
-						} else if (!headerDisplayed) {
-							nodeDataType.appendChild(domHelper.elt("header", displayType));
-							headerDisplayed = 1;
-						}
-
-						//info image
-						tmpNode = document.createElement("a");
-						tmpNode.setAttribute("href", link);
-						datasetNode.appendChild(tmpNode);
-						//buildInfoImage(tmpNode, "Dateset detail");
-
-						//dataset name and link
-						tmpNode = domHelper.hrefLink(dataset.label, link);
-						tmpNode.setAttribute("class", "cohortLink");
-						datasetNode.appendChild(tmpNode);
-
-						//status
-						if (dataset.status === session.GOODSTATUS ) { // good data, with or without warning
-							datasetNode.appendChild(domHelper.valueNode(fullname + "sampleN"));
-							if (denseMatrixType.indexOf(dataset.type) === -1) {
-								xenaQuery.datasetSamples(dataset.host, dataset.name, MAX_SAMPLES).subscribe(function (s) {
-									document.getElementById(fullname + "sampleN").
-									appendChild(domHelper.elt("label", document.createTextNode(" (n=" + s.length.toLocaleString() + ")")));
-								});
-							} else {
-								xenaQuery.datasetSamplesNDenseMatrix(dataset.host, dataset.name).subscribe(function (s) {
-									document.getElementById(fullname + "sampleN").
-									appendChild(domHelper.elt("label", document.createTextNode(" (n=" + s.toLocaleString() + ")")));
-								});
-							}
-						} else if (dataset.status === "error") {  // show error status
-							tmpNode = domHelper.elt("span", " [" + dataset.status + "] ");
-							tmpNode.style.color = "red";
-							datasetNode.appendChild(tmpNode);
-						} else {
-							datasetNode.appendChild(document.createTextNode(" [" + dataset.status + "] "));
-						}
-
-						// host
-						tmpNode = domHelper.hrefLink(session.getHubName(dataset.host), "?host=" + dataset.host);
-						tmpNode.setAttribute("id", "status" + dataset.host);
-						datasetNode.appendChild(tmpNode);
-						session.updateHostStatus(dataset.host);
-
-						// delete and reload button
-						var deletebutton = deleteDataButton (dataset);
-						if(deletebutton) {
-							datasetNode.appendChild(deletebutton);
-						}
-
-						//dataset description
-						if (dataset.description) {
-							var descriptionNode = domHelper.elt("div");
-							descriptionNode.setAttribute("class", "line-clamp");
-							descriptionNode.appendChild(domHelper.elt("summary", domHelper.stripHTML(dataset.description)));
-
-							datasetNode.appendChild(descriptionNode);
-						}
-						listNode.appendChild(datasetNode);
-					});
 					nodeDataType.appendChild(listNode);
-				});
+					listNode.appendChild(datasetNode);
 
-				rootNode.appendChild(nodeDataType);
+					//dataset name and link
+					tmpNode = domHelper.hrefLink(dataset.label, link);
+					tmpNode.setAttribute("class", "cohortLink");
+					datasetNode.appendChild(tmpNode);
+
+					//default dataset star
+					if (_.any(defaultDatasets, defaultD => (defaultD.host === dataset.host  && defaultD.dataset === dataset.name))) {
+						tmpNode = document.createElement("sapn");
+						tmpNode.innerHTML = "*";
+						tmpNode.setAttribute("class", "star");
+						datasetNode.appendChild(tmpNode);
+					}
+
+					//status
+					if (dataset.status === session.GOODSTATUS ) { // good data, with or without warning
+						tmpNode = document.createElement("span");
+						tmpNode.setAttribute("id", fullname + "sampleN");
+						datasetNode.appendChild(tmpNode);
+						if (denseMatrixType.indexOf(dataset.type) === -1) {
+							xenaQuery.datasetSamples(dataset.host, dataset.name, MAX_SAMPLES).subscribe(function (s) {
+								document.getElementById(fullname + "sampleN").appendChild(domHelper.elt("label", document.createTextNode(" (n=" + s.length.toLocaleString() + ")")));
+							});
+						} else {
+							xenaQuery.datasetSamplesNDenseMatrix(dataset.host, dataset.name).subscribe(function (s) {
+								document.getElementById(fullname + "sampleN").appendChild(domHelper.elt("label", document.createTextNode(" (n=" + s.toLocaleString() + ")")));
+							});
+						}
+					} else if (dataset.status === "error") {  // show error status
+						tmpNode = domHelper.elt("span", " [" + dataset.status + "] ");
+						tmpNode.style.color = "red";
+						datasetNode.appendChild(tmpNode);
+					} else {
+						datasetNode.appendChild(document.createTextNode(" [" + dataset.status + "] "));
+					}
+
+					// host
+					tmpNode = domHelper.hrefLink(session.getHubName(dataset.host), "?host=" + dataset.host);
+					tmpNode.setAttribute("id", "status" + dataset.host);
+					datasetNode.appendChild(tmpNode);
+					session.updateHostStatus(dataset.host);
+
+					// delete and reload button
+					var deletebutton = deleteDataButton (dataset);
+					if(deletebutton) {
+						datasetNode.appendChild(deletebutton);
+					}
+
+					//dataset description
+					if (dataset.description) {
+						var descriptionNode = domHelper.elt("div");
+						descriptionNode.setAttribute("class", "line-clamp");
+						descriptionNode.appendChild(domHelper.elt("summary", domHelper.stripHTML(dataset.description)));
+
+						datasetNode.appendChild(descriptionNode);
+					}
+				});
+			});
 		});
 	});
 }
@@ -887,7 +879,9 @@ function datasetPage(dataset, host, baseNode) {
 
 	// samples: n
 	sectionNode.appendChild(domHelper.elt("labelsameLength", "samples"));
-	sectionNode.appendChild(domHelper.valueNode(dataset + "SampleN"));
+	tmpNode = document.createElement("span");
+	tmpNode.setAttribute("id", dataset + "SampleN");
+	sectionNode.appendChild(tmpNode);
 	updataDOMXenaDataSetSampleN(dataset + "SampleN", host, dataset);
 	sectionNode.appendChild(domHelper.elt("br"));
 

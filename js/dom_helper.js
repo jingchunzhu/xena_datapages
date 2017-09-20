@@ -18,14 +18,6 @@ function hrefLink(text, link) {
 	return node;
 }
 
-// create an ELEMENT_NODE with id=<valueId>
-function valueNode(valueId) {
-	var node = elt("result", "");
-	node.setAttribute("id", valueId);
-	return node;
-}
-
-
 //create an ELEMENT_NODE with tag=<section> and id=label
 function sectionNode(label) {
 	var node = elt("section");
@@ -90,7 +82,6 @@ function setTableCellValue (tbl, row, column, value) {
 module.exports = {
 	elt: elt,
 	hrefLink: hrefLink,
-	valueNode: valueNode,
 	sectionNode: sectionNode,
 	stripHTML: stripHTML,
 	stripScripts: stripScripts,
