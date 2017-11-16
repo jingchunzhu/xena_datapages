@@ -1387,4 +1387,5 @@ module.exports = (baseNode, state, callback, xQ) => {
 	baseNode.appendChild(document.createElement("br"));
 	baseNode.appendChild(document.createElement("br"));
 	baseNode.appendChild(document.createElement("br"));
+	return () => initialized = false;
 };
