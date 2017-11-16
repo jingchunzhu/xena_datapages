@@ -127,7 +127,7 @@ function userActiveHosts(subset) {
 	return subset ? _.intersection(uAH, subset) : uAH;
 }
 
-function cohortHeatmapButton(cohort, hosts, vizbuttonParent) {
+function cohortHeatmapButton(cohort, hosts, vizbuttonParent, callback) {
 	var vizbutton,
 		goodStatus = session.GOODSTATUS;
 
@@ -136,8 +136,10 @@ function cohortHeatmapButton(cohort, hosts, vizbuttonParent) {
 		vizbutton.setAttribute("class", "vizbutton");
 		vizbutton.appendChild(document.createTextNode("Visualize"));
 		vizbutton.addEventListener("click", function() {
-			session.xenaHeatmapSetCohort(cohort);
-			location.href = "../heatmap/"; //goto heatmap page
+			callback(['cohort', 0, cohort]);
+			callback(['navigate', 'heatmap']);
+//			session.xenaHeatmapSetCohort(cohort);
+//			location.href = "../heatmap/"; //goto heatmap page
 		});
 		vizbuttonParent.appendChild(vizbutton);
 	});
@@ -280,7 +282,7 @@ function cohortListPage(hosts, rootNode) {
 }
 
 //	build single COHORT page
-function cohortPage(cohortName, hosts, rootNode) {
+function cohortPage(cohortName, hosts, rootNode, callback) {
 	//cohort section
 	var tmpNode, img,
 		node = domHelper.sectionNode("cohort"), // header
@@ -327,7 +329,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 	}
 	// visualization button
 	vizbuttonParent.appendChild(document.createTextNode(cohortName));
-	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent);
+	cohortHeatmapButton(cohortName, userActiveHosts(), vizbuttonParent, callback);
 
 	ifCohortExistDo (cohortName, hosts, undefined, function() {
 		//dataset list
@@ -1165,13 +1167,13 @@ function downloadDataButton (dataset) {
 }
 
 // sidebar datasets action
-function datasetSideBar(dataset, sideNode) {
+function datasetSideBar(dataset, sideNode, callback) {
 	//visualize button
 	var tmpNode = document.createElement("div");
 	sideNode.appendChild(tmpNode);
 	if (dataset.status === session.GOODSTATUS) {
 		cohortHeatmapButton(dataset.cohort,
-			userActiveHosts([JSON.parse(dataset.dsID).host]), tmpNode);
+			userActiveHosts([JSON.parse(dataset.dsID).host]), tmpNode, callback);
 	}
 
 	//download button
@@ -1331,7 +1333,7 @@ module.exports = (baseNode, state, callback, xQ) => {
 			function (s) {
 				if (s.length) {
 					//dataset sidebar
-					datasetSideBar(s[0], sideNode);
+					datasetSideBar(s[0], sideNode, callback);
 					datasetPage(s[0], host, mainNode);
 				}
 			}
@@ -1357,7 +1359,7 @@ module.exports = (baseNode, state, callback, xQ) => {
 		//main section cohort list page
 		mainNode = document.createElement("div");
 
-		cohortPage(cohort, userActiveHosts(), mainNode);
+		cohortPage(cohort, userActiveHosts(), mainNode, callback);
 		container.appendChild(mainNode);
 
 		container.appendChild(domHelper.elt("br"));
