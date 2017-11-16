@@ -155,7 +155,7 @@ function configHubButton () {
 
 function warningPopUp (node, loaderWarning) {
 	node.onclick = function() {
-		alert("Load Waring:\n" + JSON.stringify(loaderWarning));
+		alert("Load Warning:\n" + JSON.stringify(loaderWarning));
 	};
 }
 
@@ -298,13 +298,13 @@ function cohortPage(cohortName, hosts, rootNode) {
 		defaultDatasets = _.values(JSON.parse(resp.response)[cohortName]);
 		// default dataset legend
 		if (!_.isEmpty(defaultDatasets)) {
-			var legend = document.createElement("sapn");
+			var legend = document.createElement("span");
 			legend.innerHTML = "*";
 			legend.style.color = "red";
 			legend.style.fontSize = "1.5em";
 			defaultLegend.appendChild(legend);
 
-			legend = document.createElement("sapn");
+			legend = document.createElement("span");
 			legend.innerHTML = "default dataset in visualization basic mode";
 			defaultLegend.appendChild(legend);
 		}
@@ -389,7 +389,7 @@ function cohortPage(cohortName, hosts, rootNode) {
 
 					//default dataset star
 					if (_.any(defaultDatasets, defaultD => (defaultD.host === dataset.host  && defaultD.dataset === dataset.name))) {
-						tmpNode = document.createElement("sapn");
+						tmpNode = document.createElement("span");
 						tmpNode.innerHTML = "*";
 						tmpNode.setAttribute("class", "star");
 						datasetNode.appendChild(tmpNode);
